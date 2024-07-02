@@ -56,13 +56,21 @@ glm_Rt_wrap <- function(I_incid, si_distr, t_window, overlap){
   }
   
   # coefficient in the above is equivalent to logI = log(Rt)+log(OI) -> Rt = exp(coeff)
-  poi_glm <- glm(incidence ~ 0 + tw + offset(log_Oi), 
-                 data = data_infer, family = poisson(link = "log"))
-  
-  pred <- predict.glm(object = poi_glm, 
-                      newdata = data_infer,
-                      type = 'link', 
-                      se.fit = TRUE)
+  # poi_glm <- glm(incidence ~ 0 + tw + offset(log_Oi), 
+  #                data = data_infer, family = poisson(link = "log"))
+  # 
+  # pred <- predict.glm(object = poi_glm, 
+  #                     newdata = data_infer,
+  #                     type = 'link', 
+  #                     se.fit = TRUE)
+  poi_glm2 <- mgcv::gam(incidence ~ 0 + tw + offset(log_Oi), 
+                        data = data_infer, family = poisson(link = "log"))
+  # summary(poi_glm)
+  # summary(poi_glm2)
+  pred2 <- mgcv::predict.gam(object = poi_glm2, 
+                             newdata = data_infer,
+                             type = 'link', 
+                             se.fit = TRUE)
   
   # storing values to df
   data_infer$Mean <- exp(pred$fit) / data_infer$Oi
