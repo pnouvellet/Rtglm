@@ -45,6 +45,8 @@ plot_compare2Rt <- function(a, b, t_window, overlap,
   
   if(Corr){
     # correlations
+    y_Inf <- which(b$high_Quantile==1e4)
+    b$high_Quantile[y_Inf] <- NA
     data_m <- merge(a,b,by='t')
     Corr <- data.frame( mean = cor(x = data_m$Mean.x, 
                                    y = data_m$Mean.y, 
