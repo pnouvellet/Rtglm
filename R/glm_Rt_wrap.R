@@ -63,11 +63,11 @@ glm_Rt_wrap <- function(I_incid, si_distr, t_window, overlap){
   #                     newdata = data_infer,
   #                     type = 'link', 
   #                     se.fit = TRUE)
-  poi_glm2 <- mgcv::gam(incidence ~ 0 + tw + offset(log_Oi), 
+  poi_glm <- mgcv::gam(incidence ~ 0 + tw + offset(log_Oi), 
                         data = data_infer, family = poisson(link = "log"))
   # summary(poi_glm)
   # summary(poi_glm2)
-  pred2 <- mgcv::predict.gam(object = poi_glm2, 
+  pred <- mgcv::predict.gam(object = poi_glm, 
                              newdata = data_infer,
                              type = 'link', 
                              se.fit = TRUE)
