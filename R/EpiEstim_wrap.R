@@ -16,7 +16,7 @@ EpiEstim_wrap <- function(I_incid, si_distr, t_window, overlap, mean_prior, std_
   }
   t_end <- t_start + (t_window - 1)    
   
-  config <- make_config(list(si_distr = data$si_distr,
+  config <- make_config(list(si_distr = si_distr,
                              t_start = t_start,
                              t_end = t_end,
                              mean_prior = 1,
