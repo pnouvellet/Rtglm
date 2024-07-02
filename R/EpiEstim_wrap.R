@@ -19,8 +19,8 @@ EpiEstim_wrap <- function(I_incid, si_distr, t_window, overlap, mean_prior, std_
   config <- make_config(list(si_distr = si_distr,
                              t_start = t_start,
                              t_end = t_end,
-                             mean_prior = 1,
-                             std_prior = 1))
+                             mean_prior = mean_prior,
+                             std_prior = std_prior))
   
   temp <- estimate_R(incid = I_incid, 
                      method="non_parametric_si",
