@@ -22,7 +22,7 @@ glm_Rt_wrap <- function(I_incid, si_distr, t_window, overlap){
                            incidence = rowSums(I_incid),
                            Oi = EpiEstim::overall_infectivity(incid = I_incid,
                                                               si_distr =  si_distr))
-  # correct incidence when Oi is 0 -> move case as imported
+  # correct incidence when Oi is 0 to NA
   f <- which(data_infer$Oi ==0)
   if(length(f)>0){
     data_infer$Oi[f] <- NA
@@ -35,12 +35,7 @@ glm_Rt_wrap <- function(I_incid, si_distr, t_window, overlap){
   if(overlap==FALSE){
     data_infer$tw <- as.character(c(tw, rep(max(tw, na.rm=TRUE)+1,
                                             nrow(data_infer)-length(tw))))
-    f <- which(is.na(data_infer$Oi))
-    if(length(f)>0){
-      data_infer$tw[f] <- NA
-    }
-  }else{
-    # overlapping
+  }else{ # overlapping
     temp <- data_infer[1,]
     for(k in 1:length(t_start)){
       temp <- rbind(temp,
@@ -48,11 +43,11 @@ glm_Rt_wrap <- function(I_incid, si_distr, t_window, overlap){
     }
     temp$tw <- as.character(tw)
     data_infer <- temp
-    
-    f <- which(is.na(data_infer$Oi))
-    if(length(f)>0){
-      data_infer$tw[f] <- NA
     }
+  }
+  f <- which(is.na(data_infer$Oi))
+  if(length(f)>0){
+    data_infer$tw[f] <- NA
   }
   
   # coefficient in the above is equivalent to logI = log(Rt)+log(OI) -> Rt = exp(coeff)
