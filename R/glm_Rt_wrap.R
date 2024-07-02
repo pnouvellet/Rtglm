@@ -19,8 +19,8 @@ glm_Rt_wrap <- function(I_incid, si_distr, t_window, overlap){
   # reframe data
   data_infer <- data.frame(t = seq(1,nrow(I_incid)), 
                            incidence = rowSums(I_incid),
-                           Oi = overall_infectivity(incid = I_incid,
-                                                    si_distr =  si_distr))
+                           Oi = EpiEstim::overall_infectivity(incid = I_incid,
+                                                              si_distr =  si_distr))
   
   
   data_infer$log_Oi <- log(data_infer$Oi)
