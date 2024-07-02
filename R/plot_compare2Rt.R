@@ -12,7 +12,7 @@ plot_compare2Rt <- function(a, b, t_window, overlap,
   # for title
   o <- rep('non-overlapping',length(overlap))
   o[overlap] <- 'overlapping'
-  mtit <- paste0('tw = ',t_window[i],'; ',o[i])
+  mtit <- paste0('tw = ',t_window,'; ',o[i])
   
   # remove infinite value (replaced by 1e4)
   y_Inf <- which(!is.finite(b$high_Quantile) &
