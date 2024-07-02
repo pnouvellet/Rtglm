@@ -48,13 +48,13 @@ plot_compare2Rt <- function(a, b, t_window, overlap,
     data_m <- merge(a,b,by='t')
     Corr <- data.frame( mean = cor(x = data_m$Mean.x, 
                                    y = data_m$Mean.y, 
-                                   method = c("pearson")),
+                                   method = c("pearson"),use = "pairwise.complete.obs"),
                         low = cor(x = data_m$low_Quantile.x, 
                                   y = data_m$low_Quantile.y, 
-                                  method = c("pearson")),
+                                  method = c("pearson"),use = "pairwise.complete.obs"),
                         high = cor(x = data_m$high_Quantile.x, 
                                    y = data_m$high_Quantile.y, 
-                                   method = c("pearson")) )
+                                   method = c("pearson"),use = "pairwise.complete.obs") )
     return(Corr)
   }
 }
