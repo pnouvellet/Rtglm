@@ -74,16 +74,15 @@ gam_Rt_wrap <- function(I_incid, si_distr){
   data_infer$Mean <- exp(pred$fit) / data_infer$Oi
   data_infer$low_Quantile <- exp((pred$fit) - 1.96*pred$se.fit) / data_infer$Oi
   data_infer$high_Quantile <- exp((pred$fit) + 1.96*pred$se.fit) / data_infer$Oi
-  if(overlap==TRUE){
-    data_infer <- data_infer[seq(1+ceiling(t_window/2),
-                                 nrow(data_infer), 
-                                 by = t_window),]
-  }
+  # if(overlap==TRUE){
+  #   data_infer <- data_infer[seq(1+ceiling(t_window/2),
+  #                                nrow(data_infer), 
+  #                                by = t_window),]
+  # }
   # plot(Rt$t, Rt$Rt)
   # lines(data_infer$t,data_infer$Mean)
   
-  res <- list(config = list(t_window, overlap, t_start, t_end), 
-              Rt = data_infer[,c( "t","Mean","low_Quantile","high_Quantile")])
+  res <- list(Rt = data_infer[,c( "t","Mean","low_Quantile","high_Quantile")])
   
   return(res)
   
