@@ -8,6 +8,7 @@
 #' @export
 gam_Rt_wrap <- function(I_incid, si_distr, t_window, overlap){
   
+  overlap <- FALSE
   
   t_max <- nrow(I_incid)
   # time window
@@ -51,7 +52,7 @@ gam_Rt_wrap <- function(I_incid, si_distr, t_window, overlap){
   }
   
   # coefficient in the above is equivalent to logI = log(Rt)+log(OI) -> Rt = exp(coeff)
-  k_basis <- 2.5
+  k_basis <- 5
   k_check <- 0
   while(k_check<1){
     k_basis <- k_basis*2
@@ -78,6 +79,8 @@ gam_Rt_wrap <- function(I_incid, si_distr, t_window, overlap){
                                  nrow(data_infer), 
                                  by = t_window),]
   }
+  # plot(Rt$t, Rt$Rt)
+  # lines(data_infer$t,data_infer$Mean)
   
   res <- list(config = list(t_window, overlap, t_start, t_end), 
               Rt = data_infer[,c( "t","Mean","low_Quantile","high_Quantile")])
