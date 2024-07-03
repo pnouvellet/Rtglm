@@ -51,11 +51,13 @@ gam_Rt_wrap <- function(I_incid, si_distr, t_window, overlap){
   }
   
   # coefficient in the above is equivalent to logI = log(Rt)+log(OI) -> Rt = exp(coeff)
-  k_basis <- 5
-  while(mgcv::k.check(poi_gam)[3]<1){
+  k_basis <- 2.5
+  k_check <- 0
+  while(k_check<1){
     k_basis <- k_basis*2
     poi_gam <- mgcv::gam(incidence ~ 0 + s(t, k=k_basis) + offset(log_Oi), 
                          data = data_infer, family = poisson(link = "log"))
+    k_check <- mgcv::k.check(poi_gam)[3]
     
   }
   mgcv::k.check(poi_gam)
