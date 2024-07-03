@@ -43,7 +43,7 @@ glm_Rt_wrap <- function(I_incid, si_distr, t_window, overlap){
     }
     temp$tw <- as.character(tw)
     data_infer <- temp
-    }
+    
   }
   f <- which(is.na(data_infer$Oi))
   if(length(f)>0){
