@@ -17,7 +17,7 @@ gam_Rt_wrap <- function(I_incid, si_distr, dist = 'poisson'){
     k_basis <- min(c(k_basis*2,nrow(data_infer)-1))
     if(dist == 'nb'){
       m_gam <- mgcv::gam(incidence ~ 0 + s(t, k=k_basis) + offset(log_Oi), 
-                         data = data_infer, family = negbin(link = "log"))
+                         data = data_infer, family = mgcv::nb(link = "log"))
     }else{
       m_gam <- mgcv::gam(incidence ~ 0 + s(t, k=k_basis) + offset(log_Oi), 
                            data = data_infer, family = poisson(link = "log"))
