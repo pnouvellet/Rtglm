@@ -6,7 +6,7 @@
 #'              Including the expected data type.
 #'
 #' @export
-gam_Rt_wrap <- function(I_incid, si_distr){
+gam_Rt_wrap <- function(I_incid, si_distr, dist = 'poisson'){
   
   data_infer <- prep_glm(I_incid, si_distr)
   
@@ -15,15 +15,20 @@ gam_Rt_wrap <- function(I_incid, si_distr){
   k_check <- 0
   while((k_check<1) + (k_basis<(nrow(data_infer)-1)) == 2){
     k_basis <- min(c(k_basis*2,nrow(data_infer)-1))
-    poi_gam <- mgcv::gam(incidence ~ 0 + s(t, k=k_basis) + offset(log_Oi), 
-                         data = data_infer, family = poisson(link = "log"))
-    k_check <- mgcv::k.check(poi_gam)[3]
+    if(dist == 'nb'){
+      m_gam <- mgcv::gam(incidence ~ 0 + s(t, k=k_basis) + offset(log_Oi), 
+                         data = data_infer, family = negbin(link = "log"))
+    }else{
+      m_gam <- mgcv::gam(incidence ~ 0 + s(t, k=k_basis) + offset(log_Oi), 
+                           data = data_infer, family = poisson(link = "log"))
+    }
+    k_check <- mgcv::k.check(m_gam)[3]
     
   }
-  mgcv::k.check(poi_gam)
-  summary(poi_gam)
+  mgcv::k.check(m_gam)
+  summary(m_gam)
  
-  pred <- mgcv::predict.gam(object = poi_gam, 
+  pred <- mgcv::predict.gam(object = m_gam, 
                             newdata = data_infer,
                             type = 'link', 
                             se.fit = TRUE)

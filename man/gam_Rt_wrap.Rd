@@ -4,7 +4,7 @@
 \alias{gam_Rt_wrap}
 \title{Hello World}
 \usage{
-gam_Rt_wrap(I_incid, si_distr)
+gam_Rt_wrap(I_incid, si_distr, dist = "poisson")
 }
 \arguments{
 \item{input}{you should always document the paramters.
