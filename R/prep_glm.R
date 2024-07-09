@@ -6,7 +6,6 @@
 #'              Including the expected data type.
 #'
 #' @export
-
 prep_glm <- function(I_incid, si_distr){
   # reframe data
   data_infer <- data.frame(t = seq(1,nrow(I_incid)), 
