@@ -37,8 +37,9 @@ gam_Rt_wrap <- function(I_incid, si_distr, dist = 'poisson'){
   data_infer$Mean <- exp(pred$fit) / data_infer$Oi
   data_infer$low_Quantile <- exp((pred$fit) - 1.96*pred$se.fit) / data_infer$Oi
   data_infer$high_Quantile <- exp((pred$fit) + 1.96*pred$se.fit) / data_infer$Oi
+  data_infer$Std <- pred$se.fit
   
-  res <- list(Rt = data_infer[,c( "t","Mean","low_Quantile","high_Quantile")])
+  res <- list(Rt = data_infer[,c( "t","Mean","low_Quantile","high_Quantile",'Std')])
   
   return(res)
   

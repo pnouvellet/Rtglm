@@ -76,9 +76,10 @@ glm_Rt_wrap <- function(I_incid, si_distr, t_window, overlap){
                                  nrow(data_infer), 
                                  by = t_window),]
   }
-  
+  data_infer$Std <- pred$se.fit
+
   res <- list(config = list(t_window, overlap, t_start, t_end), 
-              Rt = data_infer[,c( "t","Mean","low_Quantile","high_Quantile")])
+              Rt = data_infer[,c( "t","Mean","low_Quantile","high_Quantile",'Std')])
 
   return(res)
   
