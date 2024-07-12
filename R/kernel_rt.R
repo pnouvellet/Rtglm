@@ -17,7 +17,7 @@ kernel_rt <- function(map, mu, sigma, Rt_min_max){
   d <- dmvnorm(x = cbind(map$cent.x,map$cent.y), mean = mu_p, sigma = sigma[1]*diag(2))
   for (i in 2:n_peak){
     mu_p <- mu[[i]]
-    d <- dmvnorm(x = cbind(map$cent.x,map$cent.y), mean = mu_p, sigma = sigma[i]*diag(2))
+    d <- d + dmvnorm(x = cbind(map$cent.x,map$cent.y), mean = mu_p, sigma = sigma[i]*diag(2))
   }
   d <- d/sum(d) # normalise it
   
