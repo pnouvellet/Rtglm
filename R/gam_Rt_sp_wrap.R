@@ -13,20 +13,17 @@ gam_Rt_wrap <- function(I_incid, si_distr, x, y){
   # coefficient in the above is equivalent to logI = log(Rt)+log(OI) -> Rt = exp(coeff)
   k_basis <- 5
   k_check <- 0
-  while((k_check<1) + (k_basis<(nrow(data_infer)-1)) == 2){
+  while((k_check>0.05) + (k_basis<(nrow(data_infer)-1)) == 2){
     k_basis <- min(c(k_basis*2,nrow(data_infer)-1))
-    if(dist == 'nb'){
-      m_gam <- mgcv::gam(incidence ~ 0 + s(t, k=k_basis) + offset(log_Oi), 
-                         data = data_infer, family = mgcv::nb(link = "log"))
-    }else{
-      m_gam <- mgcv::gam(incidence ~ 0 + s(t, k=k_basis) + offset(log_Oi), 
-                           data = data_infer, family = poisson(link = "log"))
-    }
-    k_check <- mgcv::k.check(m_gam)[3]
-    
+    # coefficient in the above is equivalent to logI = log(Rt)+log(OI) -> Rt = exp(coeff)
+    m_gam <- mgcv::gam(incidence ~ 0 + s(x,y, k=k_basis) + offset(log_Oi), 
+                       data = data_infer, family = poisson(link = "log"))
+    k_check <- mgcv::k.check(m_gam)[4]
   }
+  
   mgcv::k.check(m_gam)
   summary(m_gam)
+  plot(m_gam)
  
   data_infer <- pred_Rtglm(model = m_gam, 
                            newdata = data_infer)
