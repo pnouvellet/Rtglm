@@ -16,9 +16,9 @@ EpiEstim_sp_wrap <- function(I_incid, si_distr, t_ini, mean_prior = 5, std_prior
                              mean_prior = mean_prior,
                              std_prior = std_prior))
   
-  temp <- EpiEstim::estimate_R(incid = I_incid, 
-                     method="non_parametric_si",
-                     config = config)
+  temp <- suppressWarnings(EpiEstim::estimate_R(incid = I_incid, 
+                                                method="non_parametric_si",
+                                                config = config))
   
   temp <- temp$R[,c(1,2,3,4,5,8,11)]
   
