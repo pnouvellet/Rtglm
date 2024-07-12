@@ -28,7 +28,7 @@ gam_Rt_wrap <- function(I_incid, si_distr, dist = 'poisson'){
   mgcv::k.check(m_gam)
   summary(m_gam)
  
-  data_infer <- pred_Rtglm(model = poi_glm, 
+  data_infer <- pred_Rtglm(model = m_gam, 
                            newdata = data_infer)
   
   res <- list(model = m_gam,
