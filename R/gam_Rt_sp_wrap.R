@@ -27,6 +27,13 @@ gam_Rt_wrap <- function(I_incid, si_distr, x, y){
  
   data_infer <- pred_Rtglm(model = m_gam, 
                            newdata = data_infer)
+  #remove duplicate
+  for(i in 1:length(unique(data_infer$loc))){
+    f <- which(data_infer$loc %in% unique(data_infer$loc)[i])
+    if(length(f)>1){
+      data_infer <- data_infer[-f[-1],]
+    }
+  }
   
   res <- list(model = m_gam,
               Rt = data_infer[,c( "t","Mean","low_Quantile","high_Quantile",'Std')])
