@@ -13,7 +13,7 @@ gam_Rt_wrap <- function(I_incid, si_distr, x, y){
   # coefficient in the above is equivalent to logI = log(Rt)+log(OI) -> Rt = exp(coeff)
   k_basis <- 5
   k_check <- 0
-  while((k_check>0.05) + (k_basis<(nrow(data_infer)-1)) == 2){
+  while((k_check<0.05) + (k_basis<(nrow(data_infer)-1)) == 2){
     k_basis <- min(c(k_basis*2,nrow(data_infer)-1))
     # coefficient in the above is equivalent to logI = log(Rt)+log(OI) -> Rt = exp(coeff)
     m_gam <- mgcv::gam(incidence ~ 0 + s(x,y, k=k_basis) + offset(log_Oi), 
