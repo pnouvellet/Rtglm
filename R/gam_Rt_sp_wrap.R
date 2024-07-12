@@ -6,7 +6,7 @@
 #'              Including the expected data type.
 #'
 #' @export
-gam_Rt_wrap <- function(I_incid, si_distr, x, y){
+gam_Rt_sp_wrap <- function(I_incid, si_distr, x, y){
   
   data_infer <- prep_glm_sp(I_incid, si_distr, x, y)
   

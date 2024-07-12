@@ -2,6 +2,7 @@
 
 export(EpiEstim_sp_wrap)
 export(EpiEstim_wrap)
+export(gam_Rt_sp_wrap)
 export(gam_Rt_wrap)
 export(glm_Rt_wrap)
 export(hello_recon)
