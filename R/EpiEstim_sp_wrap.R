@@ -12,7 +12,7 @@ EpiEstim_sp_wrap <- function(I_incid, si_distr, t_ini, mean_prior = 5, std_prior
 
   config <- make_config(list(si_distr = si_distr,
                              t_start = t_ini+1,
-                             t_end = t_ini + t_max,
+                             t_end = t_max,
                              mean_prior = mean_prior,
                              std_prior = std_prior))
   
