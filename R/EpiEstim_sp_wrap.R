@@ -6,7 +6,7 @@
 #'              Including the expected data type.
 #'
 #' @export
-EpiEstim_wrap <- function(I_incid, si_distr, t_ini, mean_prior = 5, std_prior = 5){
+EpiEstim_sp_wrap <- function(I_incid, si_distr, t_ini, mean_prior = 5, std_prior = 5){
   
   t_max <- nrow(I_incid)
 

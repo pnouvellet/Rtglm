@@ -4,7 +4,14 @@
 \alias{EpiEstim_wrap}
 \title{Hello World}
 \usage{
-EpiEstim_wrap(I_incid, si_distr, t_window, overlap, mean_prior, std_prior)
+EpiEstim_wrap(
+  I_incid,
+  si_distr,
+  t_window,
+  overlap,
+  mean_prior = 5,
+  std_prior = 5
+)
 }
 \arguments{
 \item{input}{you should always document the paramters.
