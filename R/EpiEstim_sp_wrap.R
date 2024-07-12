@@ -6,19 +6,13 @@
 #'              Including the expected data type.
 #'
 #' @export
-EpiEstim_wrap <- function(I_incid, si_distr, t_window, overlap, mean_prior = 5, std_prior = 5){
+EpiEstim_wrap <- function(I_incid, si_distr, t_ini, mean_prior = 5, std_prior = 5){
   
   t_max <- nrow(I_incid)
-  # time window
-  t_start <- seq(2, t_max-(t_window-1),by = 1)
-  if (overlap == FALSE) {
-    t_start <- t_start[seq(1,length(t_start),by = t_window)]
-  }
-  t_end <- t_start + (t_window - 1)    
-  
+
   config <- make_config(list(si_distr = si_distr,
-                             t_start = t_start,
-                             t_end = t_end,
+                             t_start = t_ini+1,
+                             t_end = t_ini + t_max,
                              mean_prior = mean_prior,
                              std_prior = std_prior))
   
@@ -28,17 +22,9 @@ EpiEstim_wrap <- function(I_incid, si_distr, t_window, overlap, mean_prior = 5, 
   
   temp <- temp$R[,c(1,2,3,4,5,8,11)]
   
-  # add time and make continuous when non-overlapping
-  if(overlap == TRUE){
-    temp$t <- (temp$t_start+temp$t_end)/2
-  }else{
-    a = temp[rep(1,t_window),]
-    for(k in 2:nrow(temp)){
-      a = rbind(a,temp[rep(k,t_window),])
-    }
-    a$t <- seq(a$t_start[1],tail(a$t_end,1))
-    temp <- a
-  }
+  # add time 
+  temp$t <- (temp$t_start+temp$t_end)/2
+  
   names(temp) <- c("t_start","t_end","Mean","Std","low_Quantile",
                    "Median","high_Quantile","t")
   
