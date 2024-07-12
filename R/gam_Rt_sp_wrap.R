@@ -6,9 +6,9 @@
 #'              Including the expected data type.
 #'
 #' @export
-gam_Rt_wrap <- function(I_incid, si_distr, dist = 'poisson'){
+gam_Rt_wrap <- function(I_incid, si_distr, x, y){
   
-  data_infer <- prep_glm(I_incid, si_distr)
+  data_infer <- prep_glm_sp(I_incid, si_distr, x, y)
   
   # coefficient in the above is equivalent to logI = log(Rt)+log(OI) -> Rt = exp(coeff)
   k_basis <- 5
