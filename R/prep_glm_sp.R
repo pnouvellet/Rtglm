@@ -20,7 +20,7 @@ prep_glm_sp <- function(I_incid, si_distr,x,y){
                        loc = i)
     
     #remove initialisation
-    f <- which(I_incid$local == 0)
+    f <- which(I_incid[[i]]$local == 0)
     data <- data[-f,]
     
     data_infer <- rbind(data_infer,data)
