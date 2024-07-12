@@ -7,23 +7,23 @@
 #'
 #' @export
 #' 
-kernel_rt <- function(uk, mu, sigma, Rt_min_max){
+kernel_rt <- function(map, mu, sigma, Rt_min_max){
   
   # mu list of same size as sigma!
   n_peak <- length(sigma)
   
   # spatial component of  force of infection
   mu_p <- mu[[1]]
-  d <- dmvnorm(x = uk[,c('cent.x','cent.y')], mean = mu_p, sigma = sigma[1]*diag(2))
+  d <- dmvnorm(x = map[,c('cent.x','cent.y')], mean = mu_p, sigma = sigma[1]*diag(2))
   for (i in 2:n_peak){
     mu_p <- mu[[i]]
-    d <- dmvnorm(x = uk[,c('cent.x','cent.y')], mean = mu_p, sigma = sigma[i]*diag(2))
+    d <- dmvnorm(x = map[,c('cent.x','cent.y')], mean = mu_p, sigma = sigma[i]*diag(2))
   }
   d <- d/sum(d) # normalise it
   
   # scale
   Rt_range <- Rt_min_max$max - Rt_min_max$min
-  uk$R <- d/max(d)*Rt_range + Rt_min_max$min
+  map$R <- d/max(d)*Rt_range + Rt_min_max$min
   
-  return(uk)
+  return(map)
 }
