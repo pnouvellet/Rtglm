@@ -10,13 +10,13 @@ EpiEstim_sp_wrap <- function(I_incid, si_distr, t_ini, mean_prior = 5, std_prior
   
   t_max <- nrow(I_incid)
 
-  config <- make_config(list(si_distr = si_distr,
+  config <- EpiEstim::make_config(list(si_distr = si_distr,
                              t_start = t_ini+1,
                              t_end = t_max,
                              mean_prior = mean_prior,
                              std_prior = std_prior))
   
-  temp <- estimate_R(incid = I_incid, 
+  temp <- EpiEstim::estimate_R(incid = I_incid, 
                      method="non_parametric_si",
                      config = config)
   
