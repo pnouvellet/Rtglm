@@ -11,7 +11,7 @@ Suggests:
     testthat (>= 3.0.0),
     roxygen2
 RoxygenNote: 7.3.2
-URL: https://github.com/reconhub/Rtglm
-BugReports: https://github.com/reconhub/Rtglm/issues
+URL: https://github.com/pnouvellet/Rtglm
+BugReports: https://github.com/pnouvellet/Rtglm/issues
 VignetteBuilder: knitr
 Config/testthat/edition: 3
