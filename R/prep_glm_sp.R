@@ -11,9 +11,9 @@ prep_glm_sp <- function(I_incid, si_distr,x,y){
   data_infer<- c()
   for (i in 1:length(x)){
     # reframe data
-    data <- data.frame(t = seq(1,nrow(I_incid)), 
-                       incidence = rowSums(I_incid),
-                       Oi = EpiEstim::overall_infectivity(incid = rowSums(I_incid),
+    data <- data.frame(t = seq(1,nrow(I_incid[[i]])), 
+                       incidence = rowSums(I_incid[[i]]),
+                       Oi = EpiEstim::overall_infectivity(incid = rowSums(I_incid[[i]]),
                                                           si_distr =  si_distr),
                        x = x[i],
                        y = y[i],
