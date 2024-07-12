@@ -14,10 +14,10 @@ kernel_rt <- function(map, mu, sigma, Rt_min_max){
   
   # spatial component of  force of infection
   mu_p <- mu[[1]]
-  d <- dmvnorm(x = map[,c('cent.x','cent.y')], mean = mu_p, sigma = sigma[1]*diag(2))
+  d <- dmvnorm(x = cbind(map$cent.x,map$cent.y), mean = mu_p, sigma = sigma[1]*diag(2))
   for (i in 2:n_peak){
     mu_p <- mu[[i]]
-    d <- dmvnorm(x = map[,c('cent.x','cent.y')], mean = mu_p, sigma = sigma[i]*diag(2))
+    d <- dmvnorm(x = cbind(map$cent.x,map$cent.y), mean = mu_p, sigma = sigma[i]*diag(2))
   }
   d <- d/sum(d) # normalise it
   
