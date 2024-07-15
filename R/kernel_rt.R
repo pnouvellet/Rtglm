@@ -23,7 +23,7 @@ kernel_rt <- function(map, mu, sigma, Rt_min_max){
   
   # scale
   Rt_range <- Rt_min_max$max - Rt_min_max$min
-  map$R <- d/max(d)*Rt_range + Rt_min_max$min
+  R <- d/max(d)*Rt_range + Rt_min_max$min
   
-  return(map)
+  return(R)
 }
