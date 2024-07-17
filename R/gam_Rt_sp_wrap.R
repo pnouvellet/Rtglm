@@ -11,14 +11,19 @@ gam_Rt_sp_wrap <- function(I_incid, si_distr, x, y){
   data_infer <- prep_glm_sp(I_incid, si_distr, x, y)
   
   # coefficient in the above is equivalent to logI = log(Rt)+log(OI) -> Rt = exp(coeff)
-  k_basis <- 5
-  k_check <- 0
-  while((k_check<0.05) + (k_basis<(nrow(data_infer)-1)) == 2){
-    k_basis <- min(c(k_basis*2,nrow(data_infer)-1))
-    # coefficient in the above is equivalent to logI = log(Rt)+log(OI) -> Rt = exp(coeff)
-    m_gam <- mgcv::gam(incidence ~ 0 + s(x,y, k=k_basis) + offset(log_Oi), 
-                       data = data_infer, family = poisson(link = "log"))
-    k_check <- mgcv::k.check(m_gam)[4]
+  m_gam <- mgcv::gam(incidence ~ 0 + s(x,y) + offset(log_Oi), 
+                     data = data_infer, family = poisson(link = "log"))
+  k_check <- mgcv::k.check(m_gam)[4]
+  if(k_check<0.05){
+    k_basis <- 5
+    k_check <- 0
+    while((k_check<0.05) + (k_basis<(nrow(data_infer)-1)) == 2){
+      k_basis <- min(c(k_basis*2,nrow(data_infer)-1))
+      # coefficient in the above is equivalent to logI = log(Rt)+log(OI) -> Rt = exp(coeff)
+      m_gam <- mgcv::gam(incidence ~ 0 + s(x,y, k=k_basis) + offset(log_Oi), 
+                         data = data_infer, family = poisson(link = "log"))
+      k_check <- mgcv::k.check(m_gam)[4]
+    }
   }
   
   mgcv::k.check(m_gam)
