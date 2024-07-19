@@ -7,7 +7,7 @@
 #'
 #' @export
 #' 
-pred_Rtglm <- function(model, newdata, overlap = FALSE){
+pred_Rtglm <- function(model, newdata, t_window, overlap = FALSE){
   
   pred <- mgcv::predict.gam(object = model, 
                             newdata = newdata,
