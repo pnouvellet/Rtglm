@@ -27,6 +27,7 @@ glm_Rt_wrap <- function(I_incid, si_distr, t_window, overlap){
 
   data_infer <- pred_Rtglm(model = poi_glm, 
                            newdata = data_infer,
+                           t_window = t_window,
                            overlap = overlap)
   
   
