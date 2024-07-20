@@ -31,7 +31,8 @@ gam_Rt_wrap <- function(I_incid, si_distr, dist = 'poisson'){
   summary(m_gam)
  
   data_infer <- pred_Rtglm(model = m_gam, 
-                           newdata = data_infer)
+                           newdata = data_infer,
+                           t_window = t_window)
   
   res <- list(model = m_gam,
               Rt = data_infer[,c( "t","Mean","low_Quantile","high_Quantile",'Std')])
