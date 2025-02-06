@@ -2,14 +2,41 @@
 % Please edit documentation in R/glm_Rt_wrap.R
 \name{glm_Rt_wrap}
 \alias{glm_Rt_wrap}
-\title{Hello World}
+\title{Wrapper to run Rt.glm}
 \usage{
-glm_Rt_wrap(I_incid, si_distr, t_window, overlap)
+glm_Rt_wrap(I_incid, si_distr, t_window, overlap = FALSE)
 }
 \arguments{
-\item{input}{you should always document the paramters.
-Including the expected data type.}
+\item{I_incid}{A dataframe of non-negative integers with either i) \code{incid$I}
+containing the total incidence, or ii) two columns, so that
+\code{incid$local} contains the incidence of cases due to local transmission
+and \code{incid$imported} contains the incidence of imported cases (with
+\code{incid$local + incid$imported} the total incidence).}
+
+\item{si_distr}{a vector or dataframe (depending on the method) containing
+the discrete serial interval distribution(s) used for estimation. 
+This is equivalent to the input in EpiEstim when using the "non_parametric_si"
+method.}
+
+\item{t_window}{a single integer characterising the time-window to be used. During
+a time-window, the Rt is assumed to be constant. Time-windows may be overlapping 
+or not (see overlap parameter)}
+
+\item{overlap}{a logical, TRUE or FALSE, indicating whether time-window used for estimation
+should overlap. by default, overlap is set at FALSE.}
+}
+\value{
+A list including all results, including:
+
+config: a record of the configuration, i.e. a list including the parameters
+             t_window and overlap
+
+model: the output of the glm model (equivalent to the output when running mgcv::gam);
+
+Rt: a dataframe, including the time step for estimation; the mean, lower and higher 
+             quantile (95% CI), and standard deviation in the estimated Rt at each time 
+             step (center of each time-window).
 }
 \description{
-This is an example of how to create and document exported functions.
+Run the glm equivalent of EpiEstim.
 }

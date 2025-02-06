@@ -2,25 +2,25 @@
 % Please edit documentation in R/prep_glm.R
 \name{prep_glm}
 \alias{prep_glm}
-\title{Prepare input for Rt.glm}
+\title{Initial preparation of the input for Rt.glm}
 \usage{
 prep_glm(I_incid, si_distr)
 }
 \arguments{
-\item{si_distr}{a vector or dataframe (depending on the method) containing
-the discrete serial interval distribution(s) used for estimation. 
-This is equivalent to the input in EpiEstim when using the "non_parametric_si"
-method.}
-
-\item{Incidence}{A dataframe of non-negative integers with either i) \code{incid$I}
+\item{I_incid}{A dataframe of non-negative integers with either i) \code{incid$I}
 containing the total incidence, or ii) two columns, so that
 \code{incid$local} contains the incidence of cases due to local transmission
 and \code{incid$imported} contains the incidence of imported cases (with
 \code{incid$local + incid$imported} the total incidence).}
+
+\item{si_distr}{a vector or dataframe (depending on the method) containing
+the discrete serial interval distribution(s) used for estimation. 
+This is equivalent to the input in EpiEstim when using the "non_parametric_si"
+method.}
 }
 \value{
-data_infer a dataframe including the time (t), 
-             incidence (incidence), and the overall infectivity (Oi)
+A dataframe including the time (t), 
+             incidence (incidence), the overall infectivity (Oi), and its log-transform (log_Oi).
 }
 \description{
 This function construct a dataframe including the time (time-step used in the input), 

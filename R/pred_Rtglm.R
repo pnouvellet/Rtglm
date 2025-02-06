@@ -1,13 +1,29 @@
-#' Hello World
+#' Output the predictions for Rt 
 #'
-#' This is an example of how to create and document exported functions.
+#' This functions translate the results of the glm back into Rt estimations.
 #'
-#' @param input you should always document the paramters.
-#'              Including the expected data type.
 #'
+#' @param model: the output of the glm model (equivalent to the output when running mgcv::gam);   
+#'
+#' @param newdata A dataframe output of the Rt.glm function 'prep_glm_tWindow'. It includes the time (t), 
+#'              incidence (incidence), the overall infectivity (Oi), its log-transform (log_Oi) and the time-windows (tw).
+#'              
+#' @param t_window  a single integer characterising the time-window to be used. During
+#'              a time-window, the Rt is assumed to be constant. Time-windows may be overlapping 
+#'              or not (see overlap parameter)
+#'    
+#' @param overlap  a logical, TRUE or FALSE, indicating whether time-window used for estimation
+#'              should overlap. by default, overlap is set at FALSE.
+#'   
+#'   
+#' @returns newdata: a dataframe, same as input but with added estimates: the mean, lower and higher 
+#'              quantile (95% CI), and standard deviation in the estimated Rt at each time 
+#'              step (center of each time-window when overlapping).
+#'              
+#'                                   
 #' @export
 #' 
-pred_Rtglm <- function(model, newdata, t_window, overlap = FALSE){
+pred_Rtglm <- function(model, newdata, t_window, overlap){
   
   pred <- mgcv::predict.gam(object = model, 
                             newdata = newdata,

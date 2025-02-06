@@ -1,10 +1,10 @@
-#' Prepare input for Rt.glm
+#' Initial preparation of the input for Rt.glm
 #'
 #' This function construct a dataframe including the time (time-step used in the input), 
 #' incidence (local + imported, see below), and the overall infectivity (calculated as
 #' the sum of past incidence weighted by the serial interval distribution).
 #'
-#' @param Incidence A dataframe of non-negative integers with either i) \code{incid$I}
+#' @param I_incid A dataframe of non-negative integers with either i) \code{incid$I}
 #'              containing the total incidence, or ii) two columns, so that
 #'              \code{incid$local} contains the incidence of cases due to local transmission
 #'              and \code{incid$imported} contains the incidence of imported cases (with
@@ -15,14 +15,15 @@
 #'              This is equivalent to the input in EpiEstim when using the "non_parametric_si"
 #'              method.
 #'
-#' @return data_infer a dataframe including the time (t), 
-#'              incidence (incidence), and the overall infectivity (Oi)
+#' @return A dataframe including the time (t), 
+#'              incidence (incidence), the overall infectivity (Oi), and its log-transform (log_Oi).
 #'
 #' @export
 #' 
 #' 
 prep_glm <- function(I_incid, si_distr){
-  # reframe data
+  
+  # reframe data and get overall infectivity
   data_infer <- data.frame(t = seq(1,nrow(I_incid)), 
                            incidence = rowSums(I_incid),
                            Oi = EpiEstim::overall_infectivity(incid = I_incid,
@@ -33,6 +34,7 @@ prep_glm <- function(I_incid, si_distr){
     data_infer$Oi[f] <- NA
   }
   
+  # save the log-transformed infectivity
   data_infer$log_Oi <- log(data_infer$Oi)
   
   return(data_infer)
