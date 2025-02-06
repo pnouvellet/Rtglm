@@ -4,7 +4,7 @@
 \alias{pred_Rtglm}
 \title{Hello World}
 \usage{
-pred_Rtglm(model, newdata, overlap = FALSE)
+pred_Rtglm(model, newdata, t_window, overlap = FALSE)
 }
 \arguments{
 \item{input}{you should always document the paramters.

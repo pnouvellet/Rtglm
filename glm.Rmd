@@ -1,0 +1,273 @@
+---
+title: "simulate incidence - check"
+author: "Pierre Nouvellet"
+date: "2023-09"
+output:
+  html_document:
+    self_contained: no
+---
+
+```{r , include = FALSE, message = FALSE, warning = FALSE, error = FALSE}
+rm(list=ls())
+
+
+library(Hmisc)
+library(EpiEstim)
+library(incidence)
+library(projections)
+
+
+library(Rtglm)
+
+
+```
+
+# check MCMC with NB simulation
+
+
+# Load data
+
+```{r}
+
+## load data
+data(Flu1918)
+data(Flu2009)
+data(Measles1861)
+data(SARS2003)
+data(Smallpox1972)
+
+data <- list(Measles1861 = Measles1861, 
+             Flu1918 = Flu1918, 
+             Smallpox1972 = Smallpox1972, 
+             Flu2009 = Flu2009, 
+             SARS2003 = SARS2003)
+
+rm(Measles1861 , 
+   Flu1918 , 
+   Smallpox1972 , 
+   Flu2009 , 
+   SARS2003 )
+
+for (i in 1:length(data)){
+  if(i %in% c(1,2,3,5)){
+    data[[i]]$incidence <- data.frame(local = data[[i]]$incidence,
+                                      imported = 0)
+    data[[i]]$incidence$imported[1] <- data[[i]]$incidence$local[1]
+    data[[i]]$incidence$local[1] <- 0
+  }else{
+    data[[i]]$incidence <- data.frame(local = data[[i]]$incidence$I,
+                                      imported = 0)
+    data[[i]]$incidence$imported[1] <- data[[i]]$incidence$local[1]
+    data[[i]]$incidence$local[1] <- 0
+  }
+}
+## incidence:
+for(i in 1:length(data)){
+  plot(rowSums(data[[i]]$incidence),main = names(data)[i])
+}
+
+
+```
+
+# using EpiEstim
+
+```{r}
+# prior: exponential distribution with mean 1
+mean_prior = 5
+std_prior = 5
+para_prior <- epitrix::gamma_mucv2shapescale(mu = mean_prior,cv = std_prior/mean_prior)
+hist(rgamma(n = 1e3,shape = para_prior$shape, scale = para_prior$scale))
+
+```
+
+
+```{r,Rt}
+
+# time windows
+t_window <- rep(c(3,7,15),2) # needs to be uneven
+overlap <- c(rep(TRUE,length(t_window)/2),rep(FALSE, length(t_window)/2))
+
+
+# output
+Rt_EpiEstim <- list()
+for(k in 1:length(data)){
+  Rt_EpiEstim[[k]] <- list()
+  names(Rt_EpiEstim)[k] <- names(data)[k]
+  for(i in 1:length(t_window)){
+    # k=1
+    # i=1
+    res <- Rtglm::EpiEstim_wrap(I_incid = data[[k]]$incidence, 
+                                si_distr = data[[k]]$si_distr, 
+                                t_window = t_window[i], 
+                                overlap = overlap[i],
+                                mean_prior = mean_prior, std_prior = std_prior)
+    
+    Rt_EpiEstim[[k]][[i]] <- res
+  }
+}
+
+```
+
+# Rtglm
+
+```{r}
+
+# output
+Rt_glm <- list()
+for(k in 1:length(data)){
+  Rt_glm[[k]] <- list()
+  names(Rt_glm)[k] <- names(data)[k]
+  for(i in 1:length(t_window)){
+    res <- Rtglm::glm_Rt_wrap(I_incid = data[[k]]$incidence, 
+                              si_distr = data[[k]]$si_distr, 
+                              t_window = t_window[i], 
+                              overlap = overlap[i])
+    
+    
+    Rt_glm[[k]][[i]] <- res
+  }
+}
+
+
+
+aics <- matrix(NA,nrow =length(data), ncol = length(t_window) )
+for(k in 1:length(data)){
+  for(i in 1:length(t_window)){
+    aics[k,i] <-  Rt_glm[[k]][[i]]$model$aic
+  }
+}
+
+```
+
+# compare glm and EpiEstim
+
+```{r, eval = FALSE}
+
+layout(matrix(c(1,1,2,2,2,2),nrow = 3, ncol = 2, byrow = TRUE))
+Corr_f <- list()
+for (k in 1:length(data)){
+  
+  Corr_res <- c()
+  for(i in 1:length(t_window)){
+    plot(rowSums(data[[k]]$incidence))
+    # k=3
+    # i=4
+    a <- Rt_EpiEstim[[k]][[i]]$Rt[,c('t','Mean','low_Quantile','high_Quantile')]
+    b <- Rt_glm[[k]][[i]]$Rt[,c('t','Mean','low_Quantile','high_Quantile')]
+    
+    res <- plot_compare2Rt(a = a, b = b,
+                           t_window = t_window[i],
+                           overlap = overlap[i],
+                           Corr=TRUE)
+    
+    Corr_res <- rbind(Corr_res,res)
+  }
+  Corr_f[[k]] <- Corr_res
+}
+Corr_f
+
+
+# k=3
+#     i=4
+#     a <- Rt_EpiEstim[[k]][[i]]$Rt[,c('t','Mean','low_Quantile','high_Quantile')]
+#     b <- Rt_glm[[k]][[i]]$Rt[,c('t','Mean','low_Quantile','high_Quantile')]
+```
+
+
+```{r,glm_fig, fig.height=3.5, fig.width=6}
+
+# par(mar = c(bottom, left, top, right)), where the arguments bottom, left … are the size of the margins. The default value for mar is c(5.1, 4.1, 4.1, 2.1).
+
+par(mar = c(4, 4, 2, 1))
+
+source(file = 'Rscript/plot_Rtglm.R')
+# layout(matrix(c(1,1,2,2,2,2),nrow = 3, ncol = 2, byrow = TRUE))
+Corr_f <- list()
+for (k in 1:length(data)){
+  # k=2
+  
+  Corr_res <- c()
+  
+  xlim <- c(0,nrow(data[[k]]$incidence))
+  plot(rowSums(data[[k]]$incidence), 
+       bty = 'n',xlim = xlim,
+       xlab = 'time', ylab = 'incidence',pch=16)
+    
+    for(i in 1:length(t_window)){
+  # i=2
+    # k=3
+    # i=4
+    a <- Rt_EpiEstim[[k]][[i]]$Rt[,c('t','Mean','low_Quantile','high_Quantile')]
+    b <- Rt_glm[[k]][[i]]$Rt[,c('t','Mean','low_Quantile','high_Quantile')]
+    
+    res <- plot_Rtglm(a = a, b = b, xlim = xlim,
+                           t_window = t_window[i],
+                           overlap = overlap[i])
+    
+    # Corr_res <- rbind(Corr_res,res)
+  }
+  # Corr_f[[k]] <- Corr_res
+}
+# Corr_f
+
+
+# k=3
+#     i=4
+#     a <- Rt_EpiEstim[[k]][[i]]$Rt[,c('t','Mean','low_Quantile','high_Quantile')]
+#     b <- Rt_glm[[k]][[i]]$Rt[,c('t','Mean','low_Quantile','high_Quantile')]
+```
+
+check overlapping plots
+
+
+```{r,glm_fig, fig.height=3.5, fig.width=6}
+
+# par(mar = c(bottom, left, top, right)), where the arguments bottom, left … are the size of the margins. The default value for mar is c(5.1, 4.1, 4.1, 2.1).
+
+par(mar = c(4, 4, 2, 1))
+
+source(file = 'Rscript/plot_Rtglm.R')
+# layout(matrix(c(1,1,2,2,2,2),nrow = 3, ncol = 2, byrow = TRUE))
+Corr_f <- list()
+for (k in 1:length(data)){
+  # k=2
+  
+  Corr_res <- c()
+  
+  xlim <- c(0,nrow(data[[k]]$incidence))
+  plot(rowSums(data[[k]]$incidence), 
+       bty = 'n',xlim = xlim,
+       xlab = 'time', ylab = 'incidence',pch=16)
+    
+    for(i in 1:3){#length(t_window)){
+  # i=2
+    # k=3
+    # i=4
+    a <- Rt_EpiEstim[[k]][[i]]$Rt[,c('t','Mean','low_Quantile','high_Quantile')]
+    b <- Rt_glm[[k]][[i]]$Rt[,c('t','Mean','low_Quantile','high_Quantile')]
+    
+    # a <- Rt_EpiEstim[[k]][[i]]$Rt[,c('t_start','Mean','low_Quantile','high_Quantile')]
+    # names(a)[1] <- 't'
+    
+    if (i==1){
+    res <- plot_Rtglm(a = a, b = b, xlim = xlim,
+                           t_window = t_window[i],
+                           overlap = overlap[i])
+    }else{
+          res <- plot_Rtglm(a = a, b = b, xlim = xlim,
+                           t_window = t_window[i],
+                           overlap = overlap[i], addp = TRUE)
+    }
+    
+    # Corr_res <- rbind(Corr_res,res)
+  }
+  # Corr_f[[k]] <- Corr_res
+}
+# Corr_f
+
+
+# k=3
+#     i=4
+#     a <- Rt_EpiEstim[[k]][[i]]$Rt[,c('t','Mean','low_Quantile','high_Quantile')]
+#     b <- Rt_glm[[k]][[i]]$Rt[,c('t','Mean','low_Quantile','high_Quantile')]
+```

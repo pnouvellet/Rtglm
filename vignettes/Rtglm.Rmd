@@ -16,13 +16,10 @@ vignette: >
 # Installing the package
 
 To install the current stable, CRAN version of the package, type:
-```{r install, eval=FALSE}
-install.packages("Rtglm")
-```
 
 To benefit from the latest features and bug fixes, install the development, *github* version of the package using:
 ```{r install2, eval=FALSE}
-devtools::install_github("reconhub/Rtglm")
+devtools::install_github("pnouvellet/Rtglm",build = TRUE)
 ```
 
 Note that this requires the package *devtools* installed.
