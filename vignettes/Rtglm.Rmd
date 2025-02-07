@@ -11,7 +11,16 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-*Rtglm* provides ...
+*Rtglm* provides a way to
+
+1. Reproduce results of *EpiEstim*
+1. Rely on GAM for temporal smoothing of Rt
+1. Rely on GAM for spatial smoothing of Rt
+
+
+```{r setup, include=FALSE} 
+knitr::opts_chunk$set(warning = FALSE, message = FALSE) 
+```
 
 # Installing the package
 
@@ -20,21 +29,273 @@ To install the current stable, CRAN version of the package, type:
 To benefit from the latest features and bug fixes, install the development, *github* version of the package using:
 ```{r install2, eval=FALSE}
 devtools::install_github("pnouvellet/Rtglm",build = TRUE)
+devtools::install_github("pnouvellet/MCMCEpiEstim",build = TRUE)
 ```
 
 Note that this requires the package *devtools* installed.
+We then instal few additional useful package for this vignette.
 
-# Main visible functions of the package
-
-The main functions of the package include:
-
-...
-
-Also consider adding some examples.
-
-# Main internal functions
-
-In case you want to describe internal function as well.
-... 
+```{r}
+rm(list=ls())
+library(Hmisc)
+library(EpiEstim)
+library(incidence)
+library(projections)
+library(ggplot2)
+library(Rtglm)
+library(MCMCEpiEstim)
+```
 
 
+# Reproducing EpiEstim results in a Rt.glm framework
+
+First, we load data (from EpiEstim), e.g. the daily incidence of the 1918 influenza in Baltimore.
+
+```{r}
+
+# load data
+data <- data(Flu1918)
+
+# make a column for local and impated cases in incidence
+Flu1918$incidence <- data.frame(local = Flu1918$incidence,
+                                imported = 0)
+Flu1918$incidence$imported[1] <- Flu1918$incidence$local[1]
+Flu1918$incidence$local[1] <- 0
+    
+# plot incidence
+plot(rowSums(Flu1918$incidence),
+     main = 'Flu1918', bty = 'n', pch = 16,
+     ylab = 'incidence', xlab = 'time')
+
+
+```
+
+
+## Running EpiEstim 
+
+### set the Prior distribution for Rt
+
+```{r}
+
+# prior: exponential distribution with mean 1
+mean_prior = 5
+std_prior = 5
+para_prior <- epitrix::gamma_mucv2shapescale(mu = mean_prior,cv = std_prior/mean_prior)
+hist(rgamma(n = 1e3,shape = para_prior$shape, scale = para_prior$scale),
+     main = 'prior dist. Rt', bty = 'n', 
+     ylab = 'dist', xlab = 'Rt' )
+
+```
+
+
+### Run EpiEstim
+
+Here we run EpiEstim using a wrapper to obtain standardized output. the wrapper is part of Rt.glm.
+We run here EpiEstim with a 7 day time-window, with and without overlapping time-windows.
+
+```{r,Rt}
+
+# time windows
+t_window <- c(7,7)
+overlap <- c(TRUE,FALSE)
+
+# output
+Rt_EpiEstim <- list()
+
+for(i in 1:length(t_window)){
+  
+  res <- Rtglm::EpiEstim_wrap(I_incid = Flu1918$incidence, 
+                              si_distr = Flu1918$si_distr, 
+                              t_window = t_window[i], 
+                              overlap = overlap[i],
+                              mean_prior = mean_prior, std_prior = std_prior)
+  
+  Rt_EpiEstim[[i]] <- res
+}
+
+
+```
+
+
+## Run the same analyses with a glm
+
+```{r}
+
+
+# output
+Rt_glm <- list()
+
+for(i in 1:length(t_window)){
+  res <- Rtglm::glm_Rt_wrap(I_incid = Flu1918$incidence, 
+                            si_distr = Flu1918$si_distr, 
+                            t_window = t_window[i], 
+                            overlap = overlap[i])
+  
+  
+  Rt_glm[[i]] <- res
+}
+
+
+
+```
+
+
+## Compare glm and EpiEstim
+
+```{r,fig.height = 6, fig.width = 8}
+
+layout(matrix(c(1,1,1,1,2,2,2,2),nrow = 4, ncol = 2, byrow = TRUE))
+
+for(i in 1:length(t_window)){
+  # plot incidence
+  plot(rowSums(Flu1918$incidence),
+       main = 'Flu1918', bty = 'n', pch = 16,
+       ylab = 'incidence', xlab = 'time')
+  
+  # plot EpiEstim and Rt.glm estimates
+  a <- Rt_EpiEstim[[i]]$Rt[,c('t','Mean','low_Quantile','high_Quantile')]
+  b <- Rt_glm[[i]]$Rt[,c('t','Mean','low_Quantile','high_Quantile')]
+  
+  res <- plot_compare2Rt(a = a, b = b,
+                         t_window = t_window[i],
+                         overlap = overlap[i],
+                         Corr=TRUE)
+}
+
+```
+
+# Temporal smoothing
+
+```{r}
+
+si <- Flu1918$si_distr
+I0 <- incidence::as.incidence(x = 30, dates = 1, interval = 1)
+
+```
+
+
+## simulate an Rt
+
+```{r}
+x <- 1:101
+B <- 30
+A <- .2
+Rt <- data.frame(t = x, 
+                  Rt = A*sin((x+4)*2*pi/B)+1)
+
+plot(Rt$t,Rt$Rt,type='l',lwd = 3,
+     bty = 'n', xlab = 'Rt', ylab = 'time', ylim = c(0,1.5),
+      xaxt='n',  yaxt='n', cex.lab=1.5)
+axis(side = 1, at = c(0,50,100))
+axis(side = 2, at = c(0,.50,1, 1.5))
+abline(h = 1,col = 'red3', lty = 2)
+```
+
+## Simulate incidence
+
+In simulating incidence, we make use of code available in *MCMCEpiEstim* R-package.
+
+```{r}
+set.seed(1)
+res <- MCMCEpiEstim::project_fct(I0 = I0,
+                                 Rt = Rt,
+                                 n_loc = 1,
+                                 t_max = nrow(Rt),
+                                 si = si,
+                                 p = 1,
+                                 model = 'poisson')
+
+sim_incidence <- res$I_true
+plot(sim_incidence$`sim 1`,
+     main = 'simulated incidence', bty = 'n', pch = 16,
+     ylab = 'incidence', xlab = 'time')
+
+# format incidence
+data <- data.frame(local = c(0,sim_incidence[2:nrow(sim_incidence),2]),
+                   imported = c(sim_incidence[1,2],rep(0,nrow(sim_incidence)-1) ))
+```
+
+
+
+
+## EpiEstim Estimates
+
+```{r}
+mean_prior = 5
+std_prior = 5
+
+# time windows
+t_window <- 7 
+overlap <- TRUE
+
+# output
+Rt_EpiEstim <- Rtglm::EpiEstim_wrap(I_incid = data,
+                                    si_distr = si,
+                                    t_window = t_window,
+                                    overlap = overlap,
+                                    mean_prior = mean_prior, std_prior = std_prior)
+```
+
+
+## Rt gam
+
+```{r}
+# output
+Rt_gam <- Rtglm::gam_Rt_wrap(I_incid = data,
+                             si_distr = si)
+```
+
+
+## check simulations
+
+plot of incidence/Rts vs. time 
+
+```{r,fig.height = 6, fig.width = 8}
+layout(matrix(c(1,1,1,1,2,2,2,2),nrow = 4, ncol = 2, byrow = TRUE))
+
+# plot incidence
+plot(rowSums(data),
+     main = 'simulated incidence', bty = 'n', pch = 16,
+     ylab = 'incidence', xlab = 'time')
+
+# plot simulated Rt
+ylim <- c(0,1.5)
+plot(Rt$t, Rt$Rt,type = 'l', lwd=2, 
+     ylim = ylim,bty = 'n',
+     xlab = 'time',ylab = 'Rt',
+     main = '')
+
+# plot EpiEstim estimates
+f <- which( !is.na(Rt_EpiEstim$Rt$Mean) )
+lines(Rt_EpiEstim$Rt$t[f], Rt_EpiEstim$Rt$Mean[f],col='red3')
+polygon(c(Rt_EpiEstim$Rt$t[f],rev(Rt_EpiEstim$Rt$t[f])),
+        c(Rt_EpiEstim$Rt$low_Quantile[f],
+          rev(Rt_EpiEstim$Rt$high_Quantile[f])), 
+        col = rgb(1,0,0,.1), border = NA)
+
+# plot Rt.glm estimates
+f <- which( !is.na(Rt_gam$Rt$Mean) )
+lines(Rt_gam$Rt$t[f], Rt_gam$Rt$Mean[f],col='green4')
+polygon(c(Rt_gam$Rt$t[f],rev(Rt_gam$Rt$t[f])),
+        c(Rt_gam$Rt$low_Quantile[f],
+          rev(Rt_gam$Rt$high_Quantile[f])), 
+        col = rgb(0,1,0,.2), border = NA)
+
+legend('bottomleft',legend = c('simulated','EpiEsitm','Rt.gam'), 
+       lwd=1, col = c('black','red3','green4'), bty = 'n')
+  
+
+```
+
+
+# Spatial smoothing
+
+## Simulate Rt
+
+## Simulate incidence
+
+## EpiEstim Estimates
+
+## Rt.glm estimate
+
+## Compare estimates
