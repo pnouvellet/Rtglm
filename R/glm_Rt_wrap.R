@@ -53,7 +53,7 @@ glm_Rt_wrap <- function(I_incid, si_distr, t_window, overlap = FALSE){
   
   # save the results of the run
   res <- list(config = list(t_window, overlap), 
-              model = poi_glm,
+              model = m_glm,
               Rt = data_infer[,c( "t","Mean","low_Quantile","high_Quantile",'Std')])
 
   return(res)
