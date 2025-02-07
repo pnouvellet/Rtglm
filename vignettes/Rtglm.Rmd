@@ -49,7 +49,9 @@ library(MCMCEpiEstim)
 
 # Reproducing EpiEstim results in a Rt.glm framework
 
+
 First, we load data (from EpiEstim), e.g. the daily incidence of the 1918 influenza in Baltimore.
+
 
 ```{r}
 
@@ -71,9 +73,14 @@ plot(rowSums(Flu1918$incidence),
 ```
 
 
-## Running EpiEstim 
 
-### set the Prior distribution for Rt
+
+
+## EpiEstim estimate
+
+
+
+First, we set the prior distribution for Rt
 
 ```{r}
 
@@ -87,11 +94,8 @@ hist(rgamma(n = 1e3,shape = para_prior$shape, scale = para_prior$scale),
 
 ```
 
-
-### Run EpiEstim
-
 Here we run EpiEstim using a wrapper to obtain standardized output. the wrapper is part of Rt.glm.
-We run here EpiEstim with a 7 day time-window, with and without overlapping time-windows.
+We run EpiEstim with a 7 day time-window, with and without overlapping time-windows.
 
 ```{r,Rt}
 
@@ -117,7 +121,7 @@ for(i in 1:length(t_window)){
 ```
 
 
-## Run the same analyses with a glm
+## Rt.glm estimate
 
 ```{r}
 
@@ -140,7 +144,7 @@ for(i in 1:length(t_window)){
 ```
 
 
-## Compare glm and EpiEstim
+## Compare estimates
 
 ```{r,fig.height = 6, fig.width = 8}
 
@@ -174,7 +178,7 @@ I0 <- incidence::as.incidence(x = 30, dates = 1, interval = 1)
 ```
 
 
-## simulate an Rt
+## Simulate Rt
 
 ```{r}
 x <- 1:101
@@ -218,7 +222,7 @@ data <- data.frame(local = c(0,sim_incidence[2:nrow(sim_incidence),2]),
 
 
 
-## EpiEstim Estimates
+## EpiEstim Estimate
 
 ```{r}
 mean_prior = 5
@@ -237,7 +241,7 @@ Rt_EpiEstim <- Rtglm::EpiEstim_wrap(I_incid = data,
 ```
 
 
-## Rt gam
+## Rt.glm estimate
 
 ```{r}
 # output
@@ -246,7 +250,7 @@ Rt_gam <- Rtglm::gam_Rt_wrap(I_incid = data,
 ```
 
 
-## check simulations
+## Compare estimates
 
 plot of incidence/Rts vs. time 
 
@@ -290,9 +294,122 @@ legend('bottomleft',legend = c('simulated','EpiEsitm','Rt.gam'),
 
 # Spatial smoothing
 
+We first load a ma of the Unitary Authorities of the United Kingdom.
+
+```{r}
+uk <- readRDS(file = 'ukMap.rds')
+
+```
+
+
 ## Simulate Rt
 
+We use the kernel to simulate Rt
+
+```{r}
+library(mvtnorm)
+set.seed(1)
+
+Rt_min_max <- data.frame(max = 2,
+                        min = 0.5)
+
+# spatial component of of force of infection
+var_range <- c(.5,2)
+
+# locations of 3 peak in Rt and associated variances
+r_loc <- sample(x = 1:nrow(uk),size = 3,replace = TRUE)
+Mus <- list(c(uk$cent.x[r_loc[1]],uk$cent.y[r_loc[1]]),
+            c(uk$cent.x[r_loc[2]],uk$cent.y[r_loc[2]]),
+            c(uk$cent.x[r_loc[3]],uk$cent.y[r_loc[3]]))
+Sigmas <- runif(n = 3, min = var_range[1], max = var_range[2])
+
+# simulate Rt
+R_true <- data.frame(GID_2 = uk$GID_2,
+                     cent.x = uk$cent.x, cent.y = uk$cent.y,
+                     Rt = NA)
+
+R_true$Rt <- kernel_rt(map = uk,
+                       mu = Mus, sigma = Sigmas,
+                       Rt_min_max = Rt_min_max)
+
+```
+
 ## Simulate incidence
+
+some useful function to backcalculate incidence expected given Rt and a total incidence.
+
+```{r}
+r_2_R <- function(r){
+  R <- 1/sum(exp(-r*0:(length(si)-1))*si)
+  return(R)
+}
+
+# r_2_R(r = -0.5)
+
+findRoot <- function(r,R){
+  R_check <- r_2_R(r)
+  return( (R_check - R)^2 )
+}
+# r <- optim(par = 0, fn = findRoot, method = 'BFGS', hessian=TRUE, R = 2 )$par
+```
+
+simulte incidence
+
+```{r}
+
+I_sim <- list()
+ini_I <- list()
+k.Rt = k.within = 1
+for(k.Rt in 1:n_sample_Rs){
+  if((k.Rt%%10) == 0) print(k.Rt)
+
+  ini_I[[k.Rt]] <- I_sim[[k.Rt]] <- list()
+  # print(k.Rt)
+  # initialise incidence according to Rts
+  for (i in 1:nrow(uk)){   # do it for each locations
+    R <- R_true[i,3+k.Rt]
+    # simulate 10 previous days using growth rate (wallinga/lipsitch)
+    ini_r <- optim(par = 0, fn = findRoot,
+                   method = 'BFGS',
+                   hessian=TRUE, R = R )$par
+    init_t <- 10
+    temp <- exp(ini_r*1:init_t)
+    ini_I[[k.Rt]][[i]] <- incidence::as.incidence(x = round(temp/sum(temp)*I0),
+                                             dates = 1:init_t, interval = 1)
+  }
+  # plot(ini_I$counts)
+  for (k.within in 1:n_sample_within){
+    I_sim[[k.Rt]][[k.within]] <- list()
+    # k = k.within + ((k.Rt)-1)* n_sample_within
+    for (i in 1:nrow(uk)){
+      R <- R_true[i,3+k.Rt]
+      # simulate incidence
+      I <- as.data.frame(projections::project(x = ini_I[[k.Rt]][[i]],
+                                              R = R,
+                                              n_sim = 1, # keep at 1!
+                                              si = si[-1],
+                                              n_days = t_sim,
+                                              instantaneous_R = TRUE))
+
+
+      d_incidence <- data.frame(t = c(1:ini_I[[k.Rt]][[i]]$timespan,I[,1]),
+                                incidence = c(ini_I[[k.Rt]][[i]]$counts,I[,2]))
+      # plot(d_incidence$t, d_incidence$incidence)
+      # specify importation (e.g. the initialisation)
+      I_corr <- data.frame(local = d_incidence$incidence,
+                           imported = 0)
+      # correct initial case as imported
+      I_corr$imported[1:init_t] <- d_incidence$incidence[1:init_t]
+      I_corr$local[1:init_t] <- 0
+
+
+      I_sim[[k.Rt]][[k.within]][[i]] <- I_corr
+    }
+
+  }
+}
+
+```
 
 ## EpiEstim Estimates
 
