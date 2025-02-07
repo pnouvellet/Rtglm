@@ -2,14 +2,11 @@
 % Please edit documentation in R/plot_compare2Rt.R
 \name{plot_compare2Rt}
 \alias{plot_compare2Rt}
-\title{Hello World}
+\title{Function for plotting}
 \usage{
 plot_compare2Rt(a, b, t_window, overlap, Corr = FALSE, threshold = NA)
 }
-\arguments{
-\item{input}{you should always document the paramters.
-Including the expected data type.}
-}
 \description{
-This is an example of how to create and document exported functions.
+This function is for internal use only and is not documented.
+It was used to compare fit of multiple methods in the proof-of-concept paper.
 }

@@ -23,7 +23,7 @@
 #'                                   
 #' @export
 #' 
-pred_Rtglm <- function(model, newdata, t_window, overlap){
+pred_Rtglm <- function(model, newdata, t_window = NA, overlap = NA){
   
   pred <- mgcv::predict.gam(object = model, 
                             newdata = newdata,

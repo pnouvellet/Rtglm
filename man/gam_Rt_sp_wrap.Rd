@@ -2,14 +2,34 @@
 % Please edit documentation in R/gam_Rt_sp_wrap.R
 \name{gam_Rt_sp_wrap}
 \alias{gam_Rt_sp_wrap}
-\title{Hello World}
+\title{Wrapper to run the gam version of EpiEstim with spatial smooth}
 \usage{
 gam_Rt_sp_wrap(I_incid, si_distr, x, y)
 }
 \arguments{
-\item{input}{you should always document the paramters.
-Including the expected data type.}
+\item{I_incid}{A dataframe of non-negative integers with two columns, so that
+\code{I_incid$local} contains the incidence of cases due to local transmission
+and \code{I_incid$imported} contains the incidence of imported cases (with
+\code{I_incid$local + I_incid$imported} the total incidence).}
+
+\item{si_distr}{a vector containing
+the discrete serial interval distribution(s) used for estimation. 
+This is equivalent to the input in EpiEstim when using the "non_parametric_si"
+method.}
+
+\item{x, y}{two vectors, each of the same length as the I_incid list (number of locations) containing 
+the coordinates of each locations.}
+}
+\value{
+A list including all results, including:
+
+model: the output of the gam model (equivalent to the output when running mgcv::gam);
+
+Rt: a dataframe, including the time step for estimation; the mean, lower and higher 
+             quantile (95% CI), and standard deviation in the estimated Rt at each time 
+             step (center of each time-window).
 }
 \description{
-This is an example of how to create and document exported functions.
+Run the gam equivalent of EpiEstim with spatial smoothing. currently the function is setup for 
+a single time window and a poisson distribution.
 }

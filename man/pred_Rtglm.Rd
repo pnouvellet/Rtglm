@@ -4,7 +4,7 @@
 \alias{pred_Rtglm}
 \title{Output the predictions for Rt}
 \usage{
-pred_Rtglm(model, newdata, t_window, overlap)
+pred_Rtglm(model, newdata, t_window = NA, overlap = NA)
 }
 \arguments{
 \item{newdata}{A dataframe output of the Rt.glm function 'prep_glm_tWindow'. It includes the time (t), 

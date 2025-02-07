@@ -2,7 +2,7 @@
 % Please edit documentation in R/EpiEstim_wrap.R
 \name{EpiEstim_wrap}
 \alias{EpiEstim_wrap}
-\title{Hello World}
+\title{Wrapper to run Epiestim}
 \usage{
 EpiEstim_wrap(
   I_incid,
@@ -13,10 +13,8 @@ EpiEstim_wrap(
   std_prior = 5
 )
 }
-\arguments{
-\item{input}{you should always document the paramters.
-Including the expected data type.}
-}
 \description{
-This is an example of how to create and document exported functions.
+This function is for internal use only and is not documented.
+It was used to run EpiEstim with fixed parameterisation in the proof-of-concept paper, and
+obtain standardised outputs.
 }

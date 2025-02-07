@@ -1,9 +1,8 @@
-#' Hello World
+#' Wrapper to run Epiestim
 #'
-#' This is an example of how to create and document exported functions.
-#'
-#' @param input you should always document the paramters.
-#'              Including the expected data type.
+#' This function is for internal use only and is not documented.
+#' It was used to run EpiEstim with fixed parameterisation in the proof-of-concept paper, and
+#' obtain standardised outputs.
 #'
 #' @export
 EpiEstim_wrap <- function(I_incid, si_distr, t_window, overlap, mean_prior = 5, std_prior = 5){

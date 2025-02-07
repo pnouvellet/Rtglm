@@ -2,7 +2,7 @@
 % Please edit documentation in R/EpiEstim_sp_wrap.R
 \name{EpiEstim_sp_wrap}
 \alias{EpiEstim_sp_wrap}
-\title{Hello World}
+\title{Wrapper to run Epiestim}
 \usage{
 EpiEstim_sp_wrap(I_incid, si_distr, t_ini, mean_prior = 5, std_prior = 5)
 }
@@ -11,5 +11,7 @@ EpiEstim_sp_wrap(I_incid, si_distr, t_ini, mean_prior = 5, std_prior = 5)
 Including the expected data type.}
 }
 \description{
-This is an example of how to create and document exported functions.
+This function is for internal use only and is not documented.
+It was used to run EpiEstim with fixed parameterisation in the proof-of-concept paper, and
+obtain standardised outputs.
 }

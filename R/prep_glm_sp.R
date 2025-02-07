@@ -1,9 +1,26 @@
-#' Hello World
+#' Initial preparation of the input for a spatial Rt.glm
 #'
-#' This is an example of how to create and document exported functions.
+#' This function construct a dataframe including the time (time-step used in the input), 
+#' incidence (local + imported, see below), and the overall infectivity (calculated as
+#' the sum of past incidence weighted by the serial interval distribution).
 #'
-#' @param input you should always document the paramters.
-#'              Including the expected data type.
+#' @param I_incid A list of dataframes, with one dataframe per location.
+#'              As for the input of 'prep_glm', each dataframe containsnon-negative 
+#'              integers with two columns, so that
+#'              \code{I_incid$local} contains the incidence of cases due to local transmission
+#'              and \code{I_incid$imported} contains the incidence of imported cases (with
+#'              \code{I_incid$local + I_incid$imported} the total incidence).
+#'
+#' @param si_distr  a vector containing
+#'              the discrete serial interval distribution(s) used for estimation. 
+#'              This is equivalent to the input in EpiEstim when using the "non_parametric_si"
+#'              method.
+#'              
+#' @param x,y  two vectors, each of the same length as the I_incid list (number of locations) containing 
+#'              the coordinates of each locations.
+#'
+#' @return A dataframe including the time (t), the location and its coordinates,
+#'              incidence (incidence), the overall infectivity (Oi), and its log-transform (log_Oi).
 #'
 #' @export
 prep_glm_sp <- function(I_incid, si_distr,x,y){

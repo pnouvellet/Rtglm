@@ -7,13 +7,12 @@
 prep_glm(I_incid, si_distr)
 }
 \arguments{
-\item{I_incid}{A dataframe of non-negative integers with either i) \code{incid$I}
-containing the total incidence, or ii) two columns, so that
-\code{incid$local} contains the incidence of cases due to local transmission
-and \code{incid$imported} contains the incidence of imported cases (with
-\code{incid$local + incid$imported} the total incidence).}
+\item{I_incid}{A dataframe of non-negative integers with two columns, so that
+\code{I_incid$local} contains the incidence of cases due to local transmission
+and \code{I_incid$imported} contains the incidence of imported cases (with
+\code{I_incid$local + I_incid$imported} the total incidence).}
 
-\item{si_distr}{a vector or dataframe (depending on the method) containing
+\item{si_distr}{a vector containing
 the discrete serial interval distribution(s) used for estimation. 
 This is equivalent to the input in EpiEstim when using the "non_parametric_si"
 method.}

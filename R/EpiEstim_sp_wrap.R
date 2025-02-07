@@ -1,6 +1,9 @@
-#' Hello World
+#' Wrapper to run Epiestim
 #'
-#' This is an example of how to create and document exported functions.
+#' This function is for internal use only and is not documented.
+#' It was used to run EpiEstim with fixed parameterisation in the proof-of-concept paper, and
+#' obtain standardised outputs.
+#'
 #'
 #' @param input you should always document the paramters.
 #'              Including the expected data type.
