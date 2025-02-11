@@ -331,8 +331,22 @@ R_true <- data.frame(GID_2 = uk$GID_2,
 R_true$Rt <- kernel_rt(map = uk,
                        mu = Mus, sigma = Sigmas,
                        Rt_min_max = Rt_min_max)
+```
+
+Optional plot of the true Rt
+
+```{r, trueRt_plot, eval = FALSE}
+
+
+temp <- merge(uk,R_true)
+
+ggplot(temp, aes(fill = Rt)) +
+  ggplot2::geom_sf() +
+  scale_fill_viridis_c()
+
 
 ```
+
 
 ## Simulate incidence
 
@@ -356,63 +370,203 @@ findRoot <- function(r,R){
 simulte incidence
 
 ```{r}
+ini_I <- I_sim <- list()
+I0 <- 30
+t_sim <- 5
 
-I_sim <- list()
-ini_I <- list()
-k.Rt = k.within = 1
-for(k.Rt in 1:n_sample_Rs){
-  if((k.Rt%%10) == 0) print(k.Rt)
-
-  ini_I[[k.Rt]] <- I_sim[[k.Rt]] <- list()
-  # print(k.Rt)
-  # initialise incidence according to Rts
-  for (i in 1:nrow(uk)){   # do it for each locations
-    R <- R_true[i,3+k.Rt]
-    # simulate 10 previous days using growth rate (wallinga/lipsitch)
-    ini_r <- optim(par = 0, fn = findRoot,
-                   method = 'BFGS',
-                   hessian=TRUE, R = R )$par
-    init_t <- 10
-    temp <- exp(ini_r*1:init_t)
-    ini_I[[k.Rt]][[i]] <- incidence::as.incidence(x = round(temp/sum(temp)*I0),
-                                             dates = 1:init_t, interval = 1)
-  }
-  # plot(ini_I$counts)
-  for (k.within in 1:n_sample_within){
-    I_sim[[k.Rt]][[k.within]] <- list()
-    # k = k.within + ((k.Rt)-1)* n_sample_within
-    for (i in 1:nrow(uk)){
-      R <- R_true[i,3+k.Rt]
-      # simulate incidence
-      I <- as.data.frame(projections::project(x = ini_I[[k.Rt]][[i]],
-                                              R = R,
-                                              n_sim = 1, # keep at 1!
-                                              si = si[-1],
-                                              n_days = t_sim,
-                                              instantaneous_R = TRUE))
-
-
-      d_incidence <- data.frame(t = c(1:ini_I[[k.Rt]][[i]]$timespan,I[,1]),
-                                incidence = c(ini_I[[k.Rt]][[i]]$counts,I[,2]))
-      # plot(d_incidence$t, d_incidence$incidence)
-      # specify importation (e.g. the initialisation)
-      I_corr <- data.frame(local = d_incidence$incidence,
-                           imported = 0)
-      # correct initial case as imported
-      I_corr$imported[1:init_t] <- d_incidence$incidence[1:init_t]
-      I_corr$local[1:init_t] <- 0
-
-
-      I_sim[[k.Rt]][[k.within]][[i]] <- I_corr
-    }
-
-  }
+# initialise incidence according to Rts
+for (i in 1:nrow(uk)){   # do it for each locations
+  R <- R_true$Rt[i]
+  # simulate 10 previous days using growth rate (wallinga/lipsitch)
+  ini_r <- optim(par = 0, fn = findRoot,
+                 method = 'BFGS',
+                 hessian=TRUE, R = R )$par
+  init_t <- 10
+  temp <- exp(ini_r*1:init_t)
+  ini_I[[i]] <- incidence::as.incidence(x = round(temp/sum(temp)*I0),
+                                        dates = 1:init_t, interval = 1)
 }
 
+
+for (i in 1:nrow(uk)){
+  R <- R_true$Rt[i]
+  # simulate incidence
+  I <- as.data.frame(projections::project(x = ini_I[[i]],
+                                          R = R,
+                                          n_sim = 1, # keep at 1!
+                                          si = si[-1],
+                                          n_days = t_sim,
+                                          instantaneous_R = TRUE))
+  
+  
+  d_incidence <- data.frame(t = c(1:ini_I[[i]]$timespan,I[,1]),
+                            incidence = c(ini_I[[i]]$counts,I[,2]))
+  
+  # specify importation (e.g. the initialisation)
+  I_corr <- data.frame(local = d_incidence$incidence,
+                       imported = 0)
+  # correct initial case as imported
+  I_corr$imported[1:init_t] <- d_incidence$incidence[1:init_t]
+  I_corr$local[1:init_t] <- 0
+  
+  
+  I_sim[[i]] <- I_corr
+}
 ```
 
 ## EpiEstim Estimates
 
+
+### By UA
+
+```{r}
+res <-  data.frame(matrix(NA, nrow = nrow(uk), ncol = 5))
+names(res) <-  c('Mean','Std',
+                 'low_Quantile','Median','high_Quantile')
+
+for (i in 1:nrow(uk)){
+  
+  res_EE <- Rtglm::EpiEstim_sp_wrap(I_incid = I_sim[[i]],
+                                    si_distr = si,
+                                    t_ini = init_t)
+  
+  
+  res[i,] <- c(res_EE$R$Mean, res_EE$R$Std,
+               res_EE$R$low_Quantile, res_EE$R$Median, res_EE$R$high_Quantile)
+}
+
+names(res) <- paste0('UA_',names(res))
+R_UA <- res
+```
+
+### By mid-grid
+
+```{r}
+res <-  data.frame(matrix(NA, nrow = nrow(uk), ncol = 5))
+names(res) <-  c('Mean','Std',
+                 'low_Quantile','Median','high_Quantile')
+
+unique_grid <- unique(uk$grid2)
+
+for (i in 1:length(unique_grid)){
+  
+  f <- which(uk$grid2 %in% unique_grid[i])
+  
+  I_corr <- I_sim[[ f[1] ]]
+  if(length(f)>1){
+    for(l in 2:length(f)){
+      I_corr <- I_corr+I_sim[[ f[l] ]]
+    }
+  }
+  
+  
+  resEE <- Rtglm::EpiEstim_sp_wrap(I_incid = I_corr,
+                                   si_distr = si,
+                                   t_ini = init_t)
+  
+  
+  res[f,] <- matrix(data = c(resEE$R$Mean, resEE$R$Std,
+                             resEE$R$low_Quantile, resEE$R$Median,
+                             resEE$R$high_Quantile), nrow = length(f), ncol = 5,
+                    byrow = TRUE)
+  
+}
+
+names(res) <- paste0('grid_',names(res))
+R_grid <- res
+```
+
+
 ## Rt.glm estimate
 
+```{r}
+res_gam <- gam_Rt_sp_wrap(I_incid = I_sim,
+                          si_distr = si,
+                          x=uk$cent.x,
+                          y=uk$cent.y)
+
+res <- res_gam$Rt[,-1]
+names(res) <- paste0('gam_',names(res))
+R_gam <- res
+```
+
 ## Compare estimates
+
+
+## maps of Rts
+
+```{r, Rtestimates, eval = TRUE}
+temp <- cbind(uk,
+              R_UA,
+              R_grid,
+              R_gam)
+
+temp2 <- R_true[,c(1,4)]
+names(temp2)[2] <- 'R'
+temp <- merge(temp,temp2)
+
+g <- ggplot(temp, aes(fill = R)) +
+  ggplot2::geom_sf() +
+  ggtitle('Simulated Rt - UA')+
+  scale_fill_viridis_c(limits = c(0, 3),name = 'R',option = 'H') 
+print(g)
+
+g <- ggplot(temp, aes(fill = UA_Mean)) +
+  ggplot2::geom_sf() +
+  ggtitle('EpiEstim Rt - UA')+
+  scale_fill_viridis_c(limits = c(0, 3),name = 'R',option = 'H') 
+print(g)
+
+
+limits_x <- seq(min(uk$cent.x),max(uk$cent.x),length.out = 5)
+limits_y <- seq(min(uk$cent.y),max(uk$cent.y),length.out = 5)
+
+g <- ggplot(temp, aes(fill = grid_Mean)) +
+  ggplot2::geom_sf() +
+  ggtitle('EpiEstim Rt - medium grid') +
+  scale_fill_viridis_c(limits = c(0, 3),name = 'R',option = 'H') +
+  geom_vline(xintercept=limits_x[-c(1,length(limits_x))], linetype="solid",col='red3')+
+  geom_hline(yintercept=limits_y[-c(1,length(limits_x))], linetype="solid",col='red3') 
+print(g)
+
+g <- ggplot(temp, aes(fill = gam_Mean)) +
+  ggplot2::geom_sf() +
+  ggtitle('GAM Rt') +
+  scale_fill_viridis_c(limits = c(0, 3),name = 'R',option = 'H')  
+print(g)
+```
+
+
+## plot uncertainties maps (CV)
+
+```{r, CvRt, eval = TRUE}
+temp$UA_cvL <- log10(temp$UA_Std/temp$UA_Mean)
+temp$grid_cvL <- log10(temp$grid_Std/temp$grid_Mean)
+temp$gam_cvL <- log10(temp$gam_Std/temp$gam_Mean)
+
+# range(c(temp$UA_cvL ,
+#         temp$grid_cvL ,
+#         temp$gam_cvL))
+
+g <- ggplot(temp, aes(fill = UA_cvL)) +
+  ggplot2::geom_sf() +
+  ggtitle('CV of EpiEstim Rt - UA')+
+  scale_fill_viridis_c(limits = c(-2.1,0),name = 'Cv (R)',option = 'H') 
+print(g)
+
+g <- ggplot(temp, aes(fill = grid_cvL)) +
+  ggplot2::geom_sf() +
+  ggtitle('CV of EpiEstim Rt - medium grid') +
+  scale_fill_viridis_c(limits = c(-2.1,0),name = 'Cv (R)',option = 'H') +
+  geom_vline(xintercept=limits_x[-c(1,length(limits_x))], linetype="solid",col='red3')+
+  geom_hline(yintercept=limits_y[-c(1,length(limits_x))], linetype="solid",col='red3') 
+print(g)
+
+g <- ggplot(temp, aes(fill = gam_cvL)) +
+  ggplot2::geom_sf() +
+  ggtitle('CV of Gam Rt') +
+  scale_fill_viridis_c(limits = c(-2.1,0),name = 'Cv (R)',option = 'H',
+                       breaks = c(-3,-2,-1,0), labels = 10^c(-3,-2,-1,0))  
+print(g)
+```
+
