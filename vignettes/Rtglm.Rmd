@@ -503,13 +503,20 @@ temp <- cbind(uk,
 
 temp2 <- R_true[,c(1,4)]
 names(temp2)[2] <- 'R'
+temp3 <- merge(temp,temp2)
 temp <- merge(temp,temp2)
+```
 
-g <- ggplot(temp, aes(fill = R)) +
+```{r}
+dim(temp)
+dim(temp2)
+ggplot(temp3, aes(fill = R)) +
   ggplot2::geom_sf() +
-  ggtitle('Simulated Rt - UA')+
+  ggtitle('Simulated Rt')+
   scale_fill_viridis_c(limits = c(0, 3),name = 'R',option = 'H') 
-print(g)
+
+```
+
 
 g <- ggplot(temp, aes(fill = UA_Mean)) +
   ggplot2::geom_sf() +
