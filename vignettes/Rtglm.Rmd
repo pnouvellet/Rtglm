@@ -47,6 +47,7 @@ library(projections)
 library(ggplot2)
 library(Rtglm)
 library(MCMCEpiEstim)
+library(sf)
 ```
 
 
@@ -301,7 +302,7 @@ We first load a ma of the Unitary Authorities of the United Kingdom.
 
 ```{r, map_uk}
 uk <- readRDS(file = 'ukMap.rds')
-
+class(uk)
 ```
 
 
@@ -498,52 +499,42 @@ R_gam <- res
 
 ## maps of Rts
 
-```{r, spatial_figures_mean, eval = TRUE}
-temp <- cbind(uk,
+```{r, spatial_figures_prep, eval = TRUE}
+uk <- st_sf(cbind(uk,
               R_UA,
               R_grid,
-              R_gam)
+              R_gam))
 
-temp2 <- R_true[,c(1,4)]
-names(temp2)[2] <- 'R'
-temp3 <- merge(temp,temp2)
-temp <- merge(temp,temp2)
+temp <- R_true[,c(1,4)]
+names(temp)[2] <- 'R'
+
+uk <- merge(uk,temp)
 ```
 
-<<<<<<< HEAD
-ggplot(temp, aes(fill = R)) +
-  ggplot2::geom_sf(temp,aes(fill = R)) +
-  ggtitle('Simulated Rt - UA')+
-=======
-```{r}
-dim(temp)
-dim(temp2)
-ggplot(temp3, aes(fill = R)) +
+
+```{r,spatial_figures_mean}
+ggplot(uk, aes(fill = R)) +
   ggplot2::geom_sf() +
   ggtitle('Simulated Rt')+
->>>>>>> 787b1dd35b8b212d0ff5dcbd8ea66314bb64c4a5
   scale_fill_viridis_c(limits = c(0, 3),name = 'R',option = 'H') 
 
-```
-
-
-ggplot(temp, aes(fill = UA_Mean)) +
+ggplot(uk, aes(fill = UA_Mean)) +
   ggplot2::geom_sf() +
   ggtitle('EpiEstim Rt - UA')+
   scale_fill_viridis_c(limits = c(0, 3),name = 'R',option = 'H') 
-print(g)
+
 
 limits_x <- seq(min(uk$cent.x),max(uk$cent.x),length.out = 5)
 limits_y <- seq(min(uk$cent.y),max(uk$cent.y),length.out = 5)
 
-ggplot(temp, aes(fill = grid_Mean)) +
+ggplot(uk, aes(fill = grid_Mean)) +
   ggplot2::geom_sf() +
   ggtitle('EpiEstim Rt - medium grid') +
   scale_fill_viridis_c(limits = c(0, 3),name = 'R',option = 'H') +
   geom_vline(xintercept=limits_x[-c(1,length(limits_x))], linetype="solid",col='red3')+
   geom_hline(yintercept=limits_y[-c(1,length(limits_x))], linetype="solid",col='red3') 
 
-ggplot(temp, aes(fill = gam_Mean)) +
+ggplot(uk, aes(fill = gam_Mean)) +
   ggplot2::geom_sf() +
   ggtitle('GAM Rt') +
   scale_fill_viridis_c(limits = c(0, 3),name = 'R',option = 'H')  
@@ -553,27 +544,27 @@ ggplot(temp, aes(fill = gam_Mean)) +
 ## plot uncertainties maps (CV)
 
 ```{r, spatial_figures_CV, eval = TRUE}
-temp$UA_cvL <- log10(temp$UA_Std/temp$UA_Mean)
-temp$grid_cvL <- log10(temp$grid_Std/temp$grid_Mean)
-temp$gam_cvL <- log10(temp$gam_Std/temp$gam_Mean)
+uk$UA_cvL <- log10(uk$UA_Std/uk$UA_Mean)
+uk$grid_cvL <- log10(uk$grid_Std/uk$grid_Mean)
+uk$gam_cvL <- log10(uk$gam_Std/uk$gam_Mean)
 
 # range(c(temp$UA_cvL ,
 #         temp$grid_cvL ,
 #         temp$gam_cvL))
 
-ggplot(temp, aes(fill = UA_cvL)) +
+ggplot(uk, aes(fill = UA_cvL)) +
   ggplot2::geom_sf() +
   ggtitle('CV of EpiEstim Rt - UA')+
   scale_fill_viridis_c(limits = c(-2.1,0),name = 'Cv (R)',option = 'H') 
 
-ggplot(temp, aes(fill = grid_cvL)) +
+ggplot(uk, aes(fill = grid_cvL)) +
   ggplot2::geom_sf() +
   ggtitle('CV of EpiEstim Rt - medium grid') +
   scale_fill_viridis_c(limits = c(-2.1,0),name = 'Cv (R)',option = 'H') +
   geom_vline(xintercept=limits_x[-c(1,length(limits_x))], linetype="solid",col='red3')+
   geom_hline(yintercept=limits_y[-c(1,length(limits_x))], linetype="solid",col='red3') 
 
-ggplot(temp, aes(fill = gam_cvL)) +
+ggplot(uk, aes(fill = gam_cvL)) +
   ggplot2::geom_sf() +
   ggtitle('CV of Gam Rt') +
   scale_fill_viridis_c(limits = c(-2.1,0),name = 'Cv (R)',option = 'H',
