@@ -2,13 +2,16 @@
 title: "Rtglm: package overview"
 date: "`r Sys.Date()`"
 output:
-   rmarkdown::html_vignette:
-     toc: true
-     toc_depth: 2
-vignette: >
-  %\VignetteIndexEntry{Overview}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
+  html_document:
+    self_contained: no
+# output:
+#    rmarkdown::html_vignette:
+#      toc: true
+#      toc_depth: 2
+# vignette: >
+#   %\VignetteIndexEntry{Overview}
+#   %\VignetteEngine{knitr::rmarkdown}
+#   %\VignetteEncoding{UTF-8}
 ---
 
 *Rtglm* provides a way to
@@ -35,7 +38,7 @@ devtools::install_github("pnouvellet/MCMCEpiEstim",build = TRUE)
 Note that this requires the package *devtools* installed.
 We then instal few additional useful package for this vignette.
 
-```{r}
+```{r, library}
 rm(list=ls())
 library(Hmisc)
 library(EpiEstim)
@@ -53,7 +56,7 @@ library(MCMCEpiEstim)
 First, we load data (from EpiEstim), e.g. the daily incidence of the 1918 influenza in Baltimore.
 
 
-```{r}
+```{r,incidence_Flu}
 
 # load data
 data <- data(Flu1918)
@@ -82,7 +85,7 @@ plot(rowSums(Flu1918$incidence),
 
 First, we set the prior distribution for Rt
 
-```{r}
+```{r,setupRt}
 
 # prior: exponential distribution with mean 1
 mean_prior = 5
@@ -97,7 +100,7 @@ hist(rgamma(n = 1e3,shape = para_prior$shape, scale = para_prior$scale),
 Here we run EpiEstim using a wrapper to obtain standardized output. the wrapper is part of Rt.glm.
 We run EpiEstim with a 7 day time-window, with and without overlapping time-windows.
 
-```{r,Rt}
+```{r,Rt_EpiEstim_flu}
 
 # time windows
 t_window <- c(7,7)
@@ -123,7 +126,7 @@ for(i in 1:length(t_window)){
 
 ## Rt.glm estimate
 
-```{r}
+```{r, Rt_glm_flu}
 
 
 # output
@@ -146,7 +149,7 @@ for(i in 1:length(t_window)){
 
 ## Compare estimates
 
-```{r,fig.height = 6, fig.width = 8}
+```{r,flu_fig,fig.height = 6, fig.width = 8}
 
 layout(matrix(c(1,1,1,1,2,2,2,2),nrow = 4, ncol = 2, byrow = TRUE))
 
@@ -170,7 +173,7 @@ for(i in 1:length(t_window)){
 
 # Temporal smoothing
 
-```{r}
+```{r, temporal_setup}
 
 si <- Flu1918$si_distr
 I0 <- incidence::as.incidence(x = 30, dates = 1, interval = 1)
@@ -180,7 +183,7 @@ I0 <- incidence::as.incidence(x = 30, dates = 1, interval = 1)
 
 ## Simulate Rt
 
-```{r}
+```{r,Rt_temporal}
 x <- 1:101
 B <- 30
 A <- .2
@@ -199,7 +202,7 @@ abline(h = 1,col = 'red3', lty = 2)
 
 In simulating incidence, we make use of code available in *MCMCEpiEstim* R-package.
 
-```{r}
+```{r, incidence_temporal}
 set.seed(1)
 res <- MCMCEpiEstim::project_fct(I0 = I0,
                                  Rt = Rt,
@@ -210,7 +213,7 @@ res <- MCMCEpiEstim::project_fct(I0 = I0,
                                  model = 'poisson')
 
 sim_incidence <- res$I_true
-plot(sim_incidence$`sim 1`,
+plot(sim_incidence[,2],
      main = 'simulated incidence', bty = 'n', pch = 16,
      ylab = 'incidence', xlab = 'time')
 
@@ -224,7 +227,7 @@ data <- data.frame(local = c(0,sim_incidence[2:nrow(sim_incidence),2]),
 
 ## EpiEstim Estimate
 
-```{r}
+```{r, Rt_EpiEstim_temporal}
 mean_prior = 5
 std_prior = 5
 
@@ -243,7 +246,7 @@ Rt_EpiEstim <- Rtglm::EpiEstim_wrap(I_incid = data,
 
 ## Rt.glm estimate
 
-```{r}
+```{r,Rt_glm_temporal}
 # output
 Rt_gam <- Rtglm::gam_Rt_wrap(I_incid = data,
                              si_distr = si)
@@ -254,7 +257,7 @@ Rt_gam <- Rtglm::gam_Rt_wrap(I_incid = data,
 
 plot of incidence/Rts vs. time 
 
-```{r,fig.height = 6, fig.width = 8}
+```{r, temporal_figures, fig.height = 6, fig.width = 8}
 layout(matrix(c(1,1,1,1,2,2,2,2),nrow = 4, ncol = 2, byrow = TRUE))
 
 # plot incidence
@@ -296,7 +299,7 @@ legend('bottomleft',legend = c('simulated','EpiEsitm','Rt.gam'),
 
 We first load a ma of the Unitary Authorities of the United Kingdom.
 
-```{r}
+```{r, map_uk}
 uk <- readRDS(file = 'ukMap.rds')
 
 ```
@@ -306,7 +309,7 @@ uk <- readRDS(file = 'ukMap.rds')
 
 We use the kernel to simulate Rt
 
-```{r}
+```{r, Rt_spatial}
 library(mvtnorm)
 set.seed(1)
 
@@ -335,7 +338,7 @@ R_true$Rt <- kernel_rt(map = uk,
 
 Optional plot of the true Rt
 
-```{r, trueRt_plot, eval = FALSE}
+```{r, Rt_spatial_plot, eval = FALSE}
 
 
 temp <- merge(uk,R_true)
@@ -352,7 +355,7 @@ ggplot(temp, aes(fill = Rt)) +
 
 some useful function to backcalculate incidence expected given Rt and a total incidence.
 
-```{r}
+```{r, useful}
 r_2_R <- function(r){
   R <- 1/sum(exp(-r*0:(length(si)-1))*si)
   return(R)
@@ -367,9 +370,9 @@ findRoot <- function(r,R){
 # r <- optim(par = 0, fn = findRoot, method = 'BFGS', hessian=TRUE, R = 2 )$par
 ```
 
-simulte incidence
+simulate incidence
 
-```{r}
+```{r, incidence_spatial}
 ini_I <- I_sim <- list()
 I0 <- 30
 t_sim <- 5
@@ -419,7 +422,7 @@ for (i in 1:nrow(uk)){
 
 ### By UA
 
-```{r}
+```{r, Rt_EpiEstim_spatial_UA}
 res <-  data.frame(matrix(NA, nrow = nrow(uk), ncol = 5))
 names(res) <-  c('Mean','Std',
                  'low_Quantile','Median','high_Quantile')
@@ -441,7 +444,7 @@ R_UA <- res
 
 ### By mid-grid
 
-```{r}
+```{r, Rt_EpiEstim_spatial_grid}
 res <-  data.frame(matrix(NA, nrow = nrow(uk), ncol = 5))
 names(res) <-  c('Mean','Std',
                  'low_Quantile','Median','high_Quantile')
@@ -479,7 +482,7 @@ R_grid <- res
 
 ## Rt.glm estimate
 
-```{r}
+```{r, Rt_glm_spatial}
 res_gam <- gam_Rt_sp_wrap(I_incid = I_sim,
                           si_distr = si,
                           x=uk$cent.x,
@@ -495,7 +498,7 @@ R_gam <- res
 
 ## maps of Rts
 
-```{r, Rtestimates, eval = TRUE}
+```{r, spatial_figures_mean, eval = TRUE}
 temp <- cbind(uk,
               R_UA,
               R_grid,
@@ -505,41 +508,38 @@ temp2 <- R_true[,c(1,4)]
 names(temp2)[2] <- 'R'
 temp <- merge(temp,temp2)
 
-g <- ggplot(temp, aes(fill = R)) +
-  ggplot2::geom_sf() +
+ggplot(temp, aes(fill = R)) +
+  ggplot2::geom_sf(temp,aes(fill = R)) +
   ggtitle('Simulated Rt - UA')+
   scale_fill_viridis_c(limits = c(0, 3),name = 'R',option = 'H') 
 print(g)
 
-g <- ggplot(temp, aes(fill = UA_Mean)) +
+ggplot(temp, aes(fill = UA_Mean)) +
   ggplot2::geom_sf() +
   ggtitle('EpiEstim Rt - UA')+
   scale_fill_viridis_c(limits = c(0, 3),name = 'R',option = 'H') 
 print(g)
 
-
 limits_x <- seq(min(uk$cent.x),max(uk$cent.x),length.out = 5)
 limits_y <- seq(min(uk$cent.y),max(uk$cent.y),length.out = 5)
 
-g <- ggplot(temp, aes(fill = grid_Mean)) +
+ggplot(temp, aes(fill = grid_Mean)) +
   ggplot2::geom_sf() +
   ggtitle('EpiEstim Rt - medium grid') +
   scale_fill_viridis_c(limits = c(0, 3),name = 'R',option = 'H') +
   geom_vline(xintercept=limits_x[-c(1,length(limits_x))], linetype="solid",col='red3')+
   geom_hline(yintercept=limits_y[-c(1,length(limits_x))], linetype="solid",col='red3') 
-print(g)
 
-g <- ggplot(temp, aes(fill = gam_Mean)) +
+ggplot(temp, aes(fill = gam_Mean)) +
   ggplot2::geom_sf() +
   ggtitle('GAM Rt') +
   scale_fill_viridis_c(limits = c(0, 3),name = 'R',option = 'H')  
-print(g)
 ```
 
 
 ## plot uncertainties maps (CV)
 
-```{r, CvRt, eval = TRUE}
+```{r, spatial_figures_CV, eval = TRUE}
 temp$UA_cvL <- log10(temp$UA_Std/temp$UA_Mean)
 temp$grid_cvL <- log10(temp$grid_Std/temp$grid_Mean)
 temp$gam_cvL <- log10(temp$gam_Std/temp$gam_Mean)
@@ -548,25 +548,22 @@ temp$gam_cvL <- log10(temp$gam_Std/temp$gam_Mean)
 #         temp$grid_cvL ,
 #         temp$gam_cvL))
 
-g <- ggplot(temp, aes(fill = UA_cvL)) +
+ggplot(temp, aes(fill = UA_cvL)) +
   ggplot2::geom_sf() +
   ggtitle('CV of EpiEstim Rt - UA')+
   scale_fill_viridis_c(limits = c(-2.1,0),name = 'Cv (R)',option = 'H') 
-print(g)
 
-g <- ggplot(temp, aes(fill = grid_cvL)) +
+ggplot(temp, aes(fill = grid_cvL)) +
   ggplot2::geom_sf() +
   ggtitle('CV of EpiEstim Rt - medium grid') +
   scale_fill_viridis_c(limits = c(-2.1,0),name = 'Cv (R)',option = 'H') +
   geom_vline(xintercept=limits_x[-c(1,length(limits_x))], linetype="solid",col='red3')+
   geom_hline(yintercept=limits_y[-c(1,length(limits_x))], linetype="solid",col='red3') 
-print(g)
 
-g <- ggplot(temp, aes(fill = gam_cvL)) +
+ggplot(temp, aes(fill = gam_cvL)) +
   ggplot2::geom_sf() +
   ggtitle('CV of Gam Rt') +
   scale_fill_viridis_c(limits = c(-2.1,0),name = 'Cv (R)',option = 'H',
                        breaks = c(-3,-2,-1,0), labels = 10^c(-3,-2,-1,0))  
-print(g)
 ```
 
