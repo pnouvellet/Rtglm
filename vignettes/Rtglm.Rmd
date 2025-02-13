@@ -69,7 +69,7 @@ Flu1918$incidence$local[1] <- 0
     
 # plot incidence
 plot(rowSums(Flu1918$incidence),
-     main = 'Flu1918', bty = 'n', pch = 16,
+     main = 'Flu 1918', bty = 'n', pch = 16,
      ylab = 'incidence', xlab = 'time')
 
 
