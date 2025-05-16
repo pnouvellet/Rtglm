@@ -23,8 +23,7 @@
 #'              quantile (95% CI), and standard deviation in the estimated Rt at each time 
 #'              step (center of each time-window).
 #'              
-#' @importFrom mgcv tw 
-#' @importFrom mgcv ldTweedie 
+
 
 #' @export
 
@@ -42,7 +41,7 @@ gam_Rt_wrap <- function(I_incid, si_distr, dist = 'poisson'){
     k_basis <- min(c(k_basis*2,sum(!is.na(data_infer$Oi))-1))
     if(dist == 'nb'){
       m_gam <- mgcv::gam(incidence ~ 0 + s(t, k=k_basis) + offset(log_Oi), 
-                         data = data_infer, family = mgcv::tw(link = "log"))
+                         data = data_infer, family = mgcv::nb(link = "log"))
     }else{
       m_gam <- mgcv::gam(incidence ~ 0 + s(t, k=k_basis) + offset(log_Oi), 
                            data = data_infer, family = poisson(link = "log"))
