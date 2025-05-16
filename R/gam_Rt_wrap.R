@@ -24,6 +24,7 @@
 #'              step (center of each time-window).
 #'              
 #' @importFrom mgcv tw 
+#' @importFrom mgcv ldTweedie 
 
 #' @export
 
