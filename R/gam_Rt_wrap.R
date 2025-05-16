@@ -23,8 +23,10 @@
 #'              quantile (95% CI), and standard deviation in the estimated Rt at each time 
 #'              step (center of each time-window).
 #'              
-#'                           
+#' @importFrom mgcv tw 
+
 #' @export
+
 gam_Rt_wrap <- function(I_incid, si_distr, dist = 'poisson'){
   
   data_infer <- prep_glm(I_incid, si_distr)
