@@ -27,14 +27,14 @@
 
 #' @export
 
-gam_Rt_wrap <- function(I_incid, si_distr, dist = 'poisson'){
+gam_Rt_wrap <- function(I_incid, si_distr, dist = 'poisson', k_basis = 10){
   
   data_infer <- prep_glm(I_incid, si_distr)
   
   # run the gam, ensuring p_value of the k.check is above 0.05 (see mgcv::k.check) 
   # or the dimension of the basis used to represent the smooth term (k) is lower
   # than the number of data point available
-  k_basis <- 10
+  # k_basis <- 10
   k_check <- 0
   # while((k_check<1) + (k_basis<(nrow(data_infer)-1)) == 2){
   while((k_check<0.05) + (k_basis<(sum(!is.na(data_infer$Oi))-1)) == 2){
