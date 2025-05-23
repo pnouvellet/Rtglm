@@ -31,7 +31,7 @@ gam_Rt_sp_wrap <- function(I_incid, si_distr, x, y){
   data_infer <- prep_glm_sp(I_incid, si_distr, x, y)
   
   # coefficient in the above is equivalent to logI = log(Rt)+log(OI) -> Rt = exp(coeff)
-  m_gam <- mgcv::gam(incidence ~ 0 + s(x,y) + offset(log_Oi), 
+  m_gam <- mgcv::gam(incidence ~  s(x,y) + offset(log_Oi), 
                      data = data_infer, family = poisson(link = "log"))
   k_check <- mgcv::k.check(m_gam)[4]
   # if(k_check<0.05){
