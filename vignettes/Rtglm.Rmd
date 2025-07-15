@@ -80,6 +80,7 @@ plot(rowSums(Flu1918$incidence),
 
 
 
+
 ## EpiEstim estimate
 
 
