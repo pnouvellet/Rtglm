@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+
+<meta name="date" content="2025-02-13" />
+
+<title>Rtglm: package overview</title>
+
+<script src="Rtglm_files/header-attrs-2.26/header-attrs.js"></script>
+<script src="Rtglm_files/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="Rtglm_files/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet" />
+<script src="Rtglm_files/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="Rtglm_files/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="Rtglm_files/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="Rtglm_files/navigation-1.1/tabsets.js"></script>
+<link href="Rtglm_files/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="Rtglm_files/highlightjs-9.12.0/highlight.js"></script>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "\e259";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "\e258";
+  font-family: 'Glyphicons Halflings';
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+
+
+<div id="header">
+
+
+
+<h1 class="title toc-ignore">Rtglm: package overview</h1>
+<h4 class="date">2025-02-13</h4>
+
+</div>
+
+
+<p><em>Rtglm</em> provides a way to</p>
+<ol style="list-style-type: decimal">
+<li>Reproduce results of <em>EpiEstim</em></li>
+<li>Rely on GAM for temporal smoothing of Rt</li>
+<li>Rely on GAM for spatial smoothing of Rt</li>
+</ol>
+<div id="installing-the-package" class="section level1">
+<h1>Installing the package</h1>
+<p>To install the current stable, CRAN version of the package, type:</p>
+<p>To benefit from the latest features and bug fixes, install the
+development, <em>github</em> version of the package using:</p>
+<pre class="r"><code>devtools::install_github(&quot;pnouvellet/Rtglm&quot;,build = TRUE)
+devtools::install_github(&quot;pnouvellet/MCMCEpiEstim&quot;,build = TRUE)</code></pre>
+<p>Note that this requires the package <em>devtools</em> installed. We
+then instal few additional useful package for this vignette.</p>
+<pre class="r"><code>rm(list=ls())
+library(Hmisc)
+library(EpiEstim)
+library(incidence)
+library(projections)
+library(ggplot2)
+library(Rtglm)
+library(MCMCEpiEstim)
+library(sf)</code></pre>
+</div>
+<div id="reproducing-epiestim-results-in-a-rt.glm-framework"
+class="section level1">
+<h1>Reproducing EpiEstim results in a Rt.glm framework</h1>
+<p>First, we load data (from EpiEstim), e.g. the daily incidence of the
+1918 influenza in Baltimore.</p>
+<pre class="r"><code># load data
+data &lt;- data(Flu1918)
+
+# make a column for local and impated cases in incidence
+Flu1918$incidence &lt;- data.frame(local = Flu1918$incidence,
+                                imported = 0)
+Flu1918$incidence$imported[1] &lt;- Flu1918$incidence$local[1]
+Flu1918$incidence$local[1] &lt;- 0
+    
+# plot incidence
+plot(rowSums(Flu1918$incidence),
+     main = &#39;Flu 1918&#39;, bty = &#39;n&#39;, pch = 16,
+     ylab = &#39;incidence&#39;, xlab = &#39;time&#39;)</code></pre>
+<p><img src="Rtglm_files/figure-html/incidence_Flu-1.png" width="672" /></p>
+<div id="epiestim-estimate" class="section level2">
+<h2>EpiEstim estimate</h2>
+<p>First, we set the prior distribution for Rt</p>
+<pre class="r"><code># prior: exponential distribution with mean 1
+mean_prior = 5
+std_prior = 5
+para_prior &lt;- epitrix::gamma_mucv2shapescale(mu = mean_prior,cv = std_prior/mean_prior)
+hist(rgamma(n = 1e3,shape = para_prior$shape, scale = para_prior$scale),
+     main = &#39;prior dist. Rt&#39;, bty = &#39;n&#39;, 
+     ylab = &#39;dist&#39;, xlab = &#39;Rt&#39; )</code></pre>
+<p><img src="Rtglm_files/figure-html/setupRt-1.png" width="672" /></p>
+<p>Here we run EpiEstim using a wrapper to obtain standardized output.
+the wrapper is part of Rt.glm. We run EpiEstim with a 7 day time-window,
+with and without overlapping time-windows.</p>
+<pre class="r"><code># time windows
+t_window &lt;- c(7,7)
+overlap &lt;- c(TRUE,FALSE)
+
+# output
+Rt_EpiEstim &lt;- list()
+
+for(i in 1:length(t_window)){
+  
+  res &lt;- Rtglm::EpiEstim_wrap(I_incid = Flu1918$incidence, 
+                              si_distr = Flu1918$si_distr, 
+                              t_window = t_window[i], 
+                              overlap = overlap[i],
+                              mean_prior = mean_prior, std_prior = std_prior)
+  
+  Rt_EpiEstim[[i]] &lt;- res
+}</code></pre>
+</div>
+<div id="rt.glm-estimate" class="section level2">
+<h2>Rt.glm estimate</h2>
+<pre class="r"><code># output
+Rt_glm &lt;- list()
+
+for(i in 1:length(t_window)){
+  res &lt;- Rtglm::glm_Rt_wrap(I_incid = Flu1918$incidence, 
+                            si_distr = Flu1918$si_distr, 
+                            t_window = t_window[i], 
+                            overlap = overlap[i])
+  
+  
+  Rt_glm[[i]] &lt;- res
+}</code></pre>
+</div>
+<div id="compare-estimates" class="section level2">
+<h2>Compare estimates</h2>
+<pre class="r"><code>layout(matrix(c(1,1,1,1,2,2,2,2),nrow = 4, ncol = 2, byrow = TRUE))
+
+for(i in 1:length(t_window)){
+  # plot incidence
+  plot(rowSums(Flu1918$incidence),
+       main = &#39;Flu1918&#39;, bty = &#39;n&#39;, pch = 16,
+       ylab = &#39;incidence&#39;, xlab = &#39;time&#39;)
+  
+  # plot EpiEstim and Rt.glm estimates
+  a &lt;- Rt_EpiEstim[[i]]$Rt[,c(&#39;t&#39;,&#39;Mean&#39;,&#39;low_Quantile&#39;,&#39;high_Quantile&#39;)]
+  b &lt;- Rt_glm[[i]]$Rt[,c(&#39;t&#39;,&#39;Mean&#39;,&#39;low_Quantile&#39;,&#39;high_Quantile&#39;)]
+  
+  res &lt;- plot_compare2Rt(a = a, b = b,
+                         t_window = t_window[i],
+                         overlap = overlap[i],
+                         Corr=TRUE)
+}</code></pre>
+<p><img src="Rtglm_files/figure-html/flu_fig-1.png" width="768" /><img src="Rtglm_files/figure-html/flu_fig-2.png" width="768" /></p>
+</div>
+</div>
+<div id="temporal-smoothing" class="section level1">
+<h1>Temporal smoothing</h1>
+<pre class="r"><code>si &lt;- Flu1918$si_distr
+I0 &lt;- incidence::as.incidence(x = 30, dates = 1, interval = 1)</code></pre>
+<div id="simulate-rt" class="section level2">
+<h2>Simulate Rt</h2>
+<pre class="r"><code>x &lt;- 1:101
+B &lt;- 30
+A &lt;- .2
+Rt &lt;- data.frame(t = x, 
+                  Rt = A*sin((x+4)*2*pi/B)+1)
+
+plot(Rt$t,Rt$Rt,type=&#39;l&#39;,lwd = 3,
+     bty = &#39;n&#39;, xlab = &#39;Rt&#39;, ylab = &#39;time&#39;, ylim = c(0,1.5),
+      xaxt=&#39;n&#39;,  yaxt=&#39;n&#39;, cex.lab=1.5)
+axis(side = 1, at = c(0,50,100))
+axis(side = 2, at = c(0,.50,1, 1.5))
+abline(h = 1,col = &#39;red3&#39;, lty = 2)</code></pre>
+<p><img src="Rtglm_files/figure-html/Rt_temporal-1.png" width="672" /></p>
+</div>
+<div id="simulate-incidence" class="section level2">
+<h2>Simulate incidence</h2>
+<p>In simulating incidence, we make use of code available in
+<em>MCMCEpiEstim</em> R-package.</p>
+<pre class="r"><code>set.seed(1)
+res &lt;- MCMCEpiEstim::project_fct(I0 = I0,
+                                 Rt = Rt,
+                                 n_loc = 1,
+                                 t_max = nrow(Rt),
+                                 si = si,
+                                 p = 1,
+                                 model = &#39;poisson&#39;)
+
+sim_incidence &lt;- res$I_true
+plot(sim_incidence[,2],
+     main = &#39;simulated incidence&#39;, bty = &#39;n&#39;, pch = 16,
+     ylab = &#39;incidence&#39;, xlab = &#39;time&#39;)</code></pre>
+<p><img src="Rtglm_files/figure-html/incidence_temporal-1.png" width="672" /></p>
+<pre class="r"><code># format incidence
+data &lt;- data.frame(local = c(0,sim_incidence[2:nrow(sim_incidence),2]),
+                   imported = c(sim_incidence[1,2],rep(0,nrow(sim_incidence)-1) ))</code></pre>
+</div>
+<div id="epiestim-estimate-1" class="section level2">
+<h2>EpiEstim Estimate</h2>
+<pre class="r"><code>mean_prior = 5
+std_prior = 5
+
+# time windows
+t_window &lt;- 7 
+overlap &lt;- TRUE
+
+# output
+Rt_EpiEstim &lt;- Rtglm::EpiEstim_wrap(I_incid = data,
+                                    si_distr = si,
+                                    t_window = t_window,
+                                    overlap = overlap,
+                                    mean_prior = mean_prior, std_prior = std_prior)</code></pre>
+</div>
+<div id="rt.glm-estimate-1" class="section level2">
+<h2>Rt.glm estimate</h2>
+<pre class="r"><code># output
+Rt_gam &lt;- Rtglm::gam_Rt_wrap(I_incid = data,
+                             si_distr = si)</code></pre>
+</div>
+<div id="compare-estimates-1" class="section level2">
+<h2>Compare estimates</h2>
+<p>plot of incidence/Rts vs. time</p>
+<pre class="r"><code>layout(matrix(c(1,1,1,1,2,2,2,2),nrow = 4, ncol = 2, byrow = TRUE))
+
+# plot incidence
+plot(rowSums(data),
+     main = &#39;simulated incidence&#39;, bty = &#39;n&#39;, pch = 16,
+     ylab = &#39;incidence&#39;, xlab = &#39;time&#39;)
+
+# plot simulated Rt
+ylim &lt;- c(0,1.5)
+plot(Rt$t, Rt$Rt,type = &#39;l&#39;, lwd=2, 
+     ylim = ylim,bty = &#39;n&#39;,
+     xlab = &#39;time&#39;,ylab = &#39;Rt&#39;,
+     main = &#39;&#39;)
+
+# plot EpiEstim estimates
+f &lt;- which( !is.na(Rt_EpiEstim$Rt$Mean) )
+lines(Rt_EpiEstim$Rt$t[f], Rt_EpiEstim$Rt$Mean[f],col=&#39;red3&#39;)
+polygon(c(Rt_EpiEstim$Rt$t[f],rev(Rt_EpiEstim$Rt$t[f])),
+        c(Rt_EpiEstim$Rt$low_Quantile[f],
+          rev(Rt_EpiEstim$Rt$high_Quantile[f])), 
+        col = rgb(1,0,0,.1), border = NA)
+
+# plot Rt.glm estimates
+f &lt;- which( !is.na(Rt_gam$Rt$Mean) )
+lines(Rt_gam$Rt$t[f], Rt_gam$Rt$Mean[f],col=&#39;green4&#39;)
+polygon(c(Rt_gam$Rt$t[f],rev(Rt_gam$Rt$t[f])),
+        c(Rt_gam$Rt$low_Quantile[f],
+          rev(Rt_gam$Rt$high_Quantile[f])), 
+        col = rgb(0,1,0,.2), border = NA)
+
+legend(&#39;bottomleft&#39;,legend = c(&#39;simulated&#39;,&#39;EpiEsitm&#39;,&#39;Rt.gam&#39;), 
+       lwd=1, col = c(&#39;black&#39;,&#39;red3&#39;,&#39;green4&#39;), bty = &#39;n&#39;)</code></pre>
+<p><img src="Rtglm_files/figure-html/temporal_figures-1.png" width="768" /></p>
+</div>
+</div>
+<div id="spatial-smoothing" class="section level1">
+<h1>Spatial smoothing</h1>
+<p>We first load a ma of the Unitary Authorities of the United
+Kingdom.</p>
+<pre class="r"><code>uk &lt;- readRDS(file = &#39;ukMap.rds&#39;)
+class(uk)</code></pre>
+<pre><code>## [1] &quot;sf&quot;         &quot;data.frame&quot;</code></pre>
+<div id="simulate-rt-1" class="section level2">
+<h2>Simulate Rt</h2>
+<p>We use the kernel to simulate Rt</p>
+<pre class="r"><code>library(mvtnorm)
+set.seed(1)
+
+Rt_min_max &lt;- data.frame(max = 2,
+                        min = 0.5)
+
+# spatial component of of force of infection
+var_range &lt;- c(.5,2)
+
+# locations of 3 peak in Rt and associated variances
+r_loc &lt;- sample(x = 1:nrow(uk),size = 3,replace = TRUE)
+Mus &lt;- list(c(uk$cent.x[r_loc[1]],uk$cent.y[r_loc[1]]),
+            c(uk$cent.x[r_loc[2]],uk$cent.y[r_loc[2]]),
+            c(uk$cent.x[r_loc[3]],uk$cent.y[r_loc[3]]))
+Sigmas &lt;- runif(n = 3, min = var_range[1], max = var_range[2])
+
+# simulate Rt
+R_true &lt;- data.frame(GID_2 = uk$GID_2,
+                     cent.x = uk$cent.x, cent.y = uk$cent.y,
+                     Rt = NA)
+
+R_true$Rt &lt;- kernel_rt(map = uk,
+                       mu = Mus, sigma = Sigmas,
+                       Rt_min_max = Rt_min_max)</code></pre>
+<p>Optional plot of the true Rt</p>
+<pre class="r"><code>temp &lt;- merge(uk,R_true)
+
+ggplot(temp, aes(fill = Rt)) +
+  ggplot2::geom_sf() +
+  scale_fill_viridis_c()</code></pre>
+</div>
+<div id="simulate-incidence-1" class="section level2">
+<h2>Simulate incidence</h2>
+<p>some useful function to backcalculate incidence expected given Rt and
+a total incidence.</p>
+<pre class="r"><code>r_2_R &lt;- function(r){
+  R &lt;- 1/sum(exp(-r*0:(length(si)-1))*si)
+  return(R)
+}
+
+# r_2_R(r = -0.5)
+
+findRoot &lt;- function(r,R){
+  R_check &lt;- r_2_R(r)
+  return( (R_check - R)^2 )
+}
+# r &lt;- optim(par = 0, fn = findRoot, method = &#39;BFGS&#39;, hessian=TRUE, R = 2 )$par</code></pre>
+<p>simulate incidence</p>
+<pre class="r"><code>ini_I &lt;- I_sim &lt;- list()
+I0 &lt;- 30
+t_sim &lt;- 5
+
+# initialise incidence according to Rts
+for (i in 1:nrow(uk)){   # do it for each locations
+  R &lt;- R_true$Rt[i]
+  # simulate 10 previous days using growth rate (wallinga/lipsitch)
+  ini_r &lt;- optim(par = 0, fn = findRoot,
+                 method = &#39;BFGS&#39;,
+                 hessian=TRUE, R = R )$par
+  init_t &lt;- 10
+  temp &lt;- exp(ini_r*1:init_t)
+  ini_I[[i]] &lt;- incidence::as.incidence(x = round(temp/sum(temp)*I0),
+                                        dates = 1:init_t, interval = 1)
+}
+
+
+for (i in 1:nrow(uk)){
+  R &lt;- R_true$Rt[i]
+  # simulate incidence
+  I &lt;- as.data.frame(projections::project(x = ini_I[[i]],
+                                          R = R,
+                                          n_sim = 1, # keep at 1!
+                                          si = si[-1],
+                                          n_days = t_sim,
+                                          instantaneous_R = TRUE))
+  
+  
+  d_incidence &lt;- data.frame(t = c(1:ini_I[[i]]$timespan,I[,1]),
+                            incidence = c(ini_I[[i]]$counts,I[,2]))
+  
+  # specify importation (e.g. the initialisation)
+  I_corr &lt;- data.frame(local = d_incidence$incidence,
+                       imported = 0)
+  # correct initial case as imported
+  I_corr$imported[1:init_t] &lt;- d_incidence$incidence[1:init_t]
+  I_corr$local[1:init_t] &lt;- 0
+  
+  
+  I_sim[[i]] &lt;- I_corr
+}</code></pre>
+</div>
+<div id="epiestim-estimates" class="section level2">
+<h2>EpiEstim Estimates</h2>
+<div id="by-ua" class="section level3">
+<h3>By UA</h3>
+<pre class="r"><code>res &lt;-  data.frame(matrix(NA, nrow = nrow(uk), ncol = 5))
+names(res) &lt;-  c(&#39;Mean&#39;,&#39;Std&#39;,
+                 &#39;low_Quantile&#39;,&#39;Median&#39;,&#39;high_Quantile&#39;)
+
+for (i in 1:nrow(uk)){
+  
+  res_EE &lt;- Rtglm::EpiEstim_sp_wrap(I_incid = I_sim[[i]],
+                                    si_distr = si,
+                                    t_ini = init_t)
+  
+  
+  res[i,] &lt;- c(res_EE$R$Mean, res_EE$R$Std,
+               res_EE$R$low_Quantile, res_EE$R$Median, res_EE$R$high_Quantile)
+}
+
+names(res) &lt;- paste0(&#39;UA_&#39;,names(res))
+R_UA &lt;- res</code></pre>
+</div>
+<div id="by-mid-grid" class="section level3">
+<h3>By mid-grid</h3>
+<pre class="r"><code>res &lt;-  data.frame(matrix(NA, nrow = nrow(uk), ncol = 5))
+names(res) &lt;-  c(&#39;Mean&#39;,&#39;Std&#39;,
+                 &#39;low_Quantile&#39;,&#39;Median&#39;,&#39;high_Quantile&#39;)
+
+unique_grid &lt;- unique(uk$grid2)
+
+for (i in 1:length(unique_grid)){
+  
+  f &lt;- which(uk$grid2 %in% unique_grid[i])
+  
+  I_corr &lt;- I_sim[[ f[1] ]]
+  if(length(f)&gt;1){
+    for(l in 2:length(f)){
+      I_corr &lt;- I_corr+I_sim[[ f[l] ]]
+    }
+  }
+  
+  
+  resEE &lt;- Rtglm::EpiEstim_sp_wrap(I_incid = I_corr,
+                                   si_distr = si,
+                                   t_ini = init_t)
+  
+  
+  res[f,] &lt;- matrix(data = c(resEE$R$Mean, resEE$R$Std,
+                             resEE$R$low_Quantile, resEE$R$Median,
+                             resEE$R$high_Quantile), nrow = length(f), ncol = 5,
+                    byrow = TRUE)
+  
+}
+
+names(res) &lt;- paste0(&#39;grid_&#39;,names(res))
+R_grid &lt;- res</code></pre>
+</div>
+</div>
+<div id="rt.glm-estimate-2" class="section level2">
+<h2>Rt.glm estimate</h2>
+<pre class="r"><code>res_gam &lt;- gam_Rt_sp_wrap(I_incid = I_sim,
+                          si_distr = si,
+                          x=uk$cent.x,
+                          y=uk$cent.y)
+
+res &lt;- res_gam$Rt[,-1]
+names(res) &lt;- paste0(&#39;gam_&#39;,names(res))
+R_gam &lt;- res</code></pre>
+</div>
+<div id="compare-estimates-2" class="section level2">
+<h2>Compare estimates</h2>
+</div>
+<div id="maps-of-rts" class="section level2">
+<h2>maps of Rts</h2>
+<pre class="r"><code>uk &lt;- st_sf(cbind(uk,
+              R_UA,
+              R_grid,
+              R_gam))
+
+temp &lt;- R_true[,c(1,4)]
+names(temp)[2] &lt;- &#39;R&#39;
+
+uk &lt;- merge(uk,temp)</code></pre>
+<pre class="r"><code>ggplot(uk, aes(fill = R)) +
+  ggplot2::geom_sf() +
+  ggtitle(&#39;Simulated Rt&#39;)+
+  scale_fill_viridis_c(limits = c(0, 3),name = &#39;R&#39;,option = &#39;H&#39;) </code></pre>
+<p><img src="Rtglm_files/figure-html/spatial_figures_mean-1.png" width="672" /></p>
+<pre class="r"><code>ggplot(uk, aes(fill = UA_Mean)) +
+  ggplot2::geom_sf() +
+  ggtitle(&#39;EpiEstim Rt - UA&#39;)+
+  scale_fill_viridis_c(limits = c(0, 3),name = &#39;R&#39;,option = &#39;H&#39;) </code></pre>
+<p><img src="Rtglm_files/figure-html/spatial_figures_mean-2.png" width="672" /></p>
+<pre class="r"><code>limits_x &lt;- seq(min(uk$cent.x),max(uk$cent.x),length.out = 5)
+limits_y &lt;- seq(min(uk$cent.y),max(uk$cent.y),length.out = 5)
+
+ggplot(uk, aes(fill = grid_Mean)) +
+  ggplot2::geom_sf() +
+  ggtitle(&#39;EpiEstim Rt - medium grid&#39;) +
+  scale_fill_viridis_c(limits = c(0, 3),name = &#39;R&#39;,option = &#39;H&#39;) +
+  geom_vline(xintercept=limits_x[-c(1,length(limits_x))], linetype=&quot;solid&quot;,col=&#39;red3&#39;)+
+  geom_hline(yintercept=limits_y[-c(1,length(limits_x))], linetype=&quot;solid&quot;,col=&#39;red3&#39;) </code></pre>
+<p><img src="Rtglm_files/figure-html/spatial_figures_mean-3.png" width="672" /></p>
+<pre class="r"><code>ggplot(uk, aes(fill = gam_Mean)) +
+  ggplot2::geom_sf() +
+  ggtitle(&#39;GAM Rt&#39;) +
+  scale_fill_viridis_c(limits = c(0, 3),name = &#39;R&#39;,option = &#39;H&#39;)  </code></pre>
+<p><img src="Rtglm_files/figure-html/spatial_figures_mean-4.png" width="672" /></p>
+</div>
+<div id="plot-uncertainties-maps-cv" class="section level2">
+<h2>plot uncertainties maps (CV)</h2>
+<pre class="r"><code>uk$UA_cvL &lt;- log10(uk$UA_Std/uk$UA_Mean)
+uk$grid_cvL &lt;- log10(uk$grid_Std/uk$grid_Mean)
+uk$gam_cvL &lt;- log10(uk$gam_Std/uk$gam_Mean)
+
+# range(c(temp$UA_cvL ,
+#         temp$grid_cvL ,
+#         temp$gam_cvL))
+
+ggplot(uk, aes(fill = UA_cvL)) +
+  ggplot2::geom_sf() +
+  ggtitle(&#39;CV of EpiEstim Rt - UA&#39;)+
+  scale_fill_viridis_c(limits = c(-2.1,0),name = &#39;Cv (R)&#39;,option = &#39;H&#39;) </code></pre>
+<p><img src="Rtglm_files/figure-html/spatial_figures_CV-1.png" width="672" /></p>
+<pre class="r"><code>ggplot(uk, aes(fill = grid_cvL)) +
+  ggplot2::geom_sf() +
+  ggtitle(&#39;CV of EpiEstim Rt - medium grid&#39;) +
+  scale_fill_viridis_c(limits = c(-2.1,0),name = &#39;Cv (R)&#39;,option = &#39;H&#39;) +
+  geom_vline(xintercept=limits_x[-c(1,length(limits_x))], linetype=&quot;solid&quot;,col=&#39;red3&#39;)+
+  geom_hline(yintercept=limits_y[-c(1,length(limits_x))], linetype=&quot;solid&quot;,col=&#39;red3&#39;) </code></pre>
+<p><img src="Rtglm_files/figure-html/spatial_figures_CV-2.png" width="672" /></p>
+<pre class="r"><code>ggplot(uk, aes(fill = gam_cvL)) +
+  ggplot2::geom_sf() +
+  ggtitle(&#39;CV of Gam Rt&#39;) +
+  scale_fill_viridis_c(limits = c(-2.1,0),name = &#39;Cv (R)&#39;,option = &#39;H&#39;,
+                       breaks = c(-3,-2,-1,0), labels = 10^c(-3,-2,-1,0))  </code></pre>
+<p><img src="Rtglm_files/figure-html/spatial_figures_CV-3.png" width="672" /></p>
+</div>
+</div>
+
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
