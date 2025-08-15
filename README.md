@@ -13,7 +13,7 @@ devtools::install_github("pnouvellet/Rtglm",build = TRUE)
 
 ### Vignettes
 Please see the vignettes html output [here](https://pnouvellet.github.io/Rtglm/Rtglm.html).
-You can download the vignette .rmd file from [here](https://pnouvellet.github.io/Rtglm/Rtglm.rmd).
+You can download the vignette .rmd file from [here](https://raw.githubusercontent.com/pnouvellet/Rtglm/refs/heads/master/docs/Rtglm.Rmd).
 
 
 ### References
