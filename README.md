@@ -11,10 +11,18 @@ To install the latest version, use:
 devtools::install_github("pnouvellet/Rtglm",build = TRUE)
 ```
 
-### Vignettes
-Please see the vignettes html output [here](https://pnouvellet.github.io/Rtglm/Rtglm.html).
+### Vignette
+
+A vignette is available to demonstrate how to use key functionalities of Rtglm, including:
+- How to reproduce EpiEstim results,
+- Perform temporal smoothing relying on GAM models,
+- Perform spatial smoothing relying on GAM models.
+
+Please see the vignette html output [here](https://pnouvellet.github.io/Rtglm/Rtglm.html).
+
 You can download the vignette .rmd file from [here](https://raw.githubusercontent.com/pnouvellet/Rtglm/refs/heads/master/docs/Rtglm.Rmd).
 
+For further information, refer to the publication here [2].
 
 ### References
 [1] Anne Cori, Neil M. Ferguson, Christophe Fraser, Simon Cauchemez, [A New Framework and Software to Estimate Time-Varying Reproduction Numbers During Epidemics](https://doi.org/10.1093/aje/kwt133), American Journal of Epidemiology, Volume 178, Issue 9, 1 November 2013, Pages 1505–1512. 
