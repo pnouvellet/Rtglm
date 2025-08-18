@@ -607,12 +607,14 @@ uk$gam_cvL <- log10(uk$gam_Std/uk$gam_Mean)
 ggplot(uk, aes(fill = UA_cvL)) +
   ggplot2::geom_sf() +
   ggtitle('CV of EpiEstim Rt - UA')+
-  scale_fill_viridis_c(limits = c(-2.1,0),name = 'Cv (R)',option = 'H') 
+  scale_fill_viridis_c(limits = c(-2.1,0),name = 'Cv (R)',option = 'H',
+                       breaks = c(-3,-2,-1,0), labels = 10^c(-3,-2,-1,0)) 
 
 ggplot(uk, aes(fill = grid_cvL)) +
   ggplot2::geom_sf() +
   ggtitle('CV of EpiEstim Rt - medium grid') +
-  scale_fill_viridis_c(limits = c(-2.1,0),name = 'Cv (R)',option = 'H') +
+  scale_fill_viridis_c(limits = c(-2.1,0),name = 'Cv (R)',option = 'H',
+                       breaks = c(-3,-2,-1,0), labels = 10^c(-3,-2,-1,0)) +
   geom_vline(xintercept=limits_x[-c(1,length(limits_x))], linetype="solid",col='red3')+
   geom_hline(yintercept=limits_y[-c(1,length(limits_x))], linetype="solid",col='red3') 
 
