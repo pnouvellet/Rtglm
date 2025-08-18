@@ -30,13 +30,13 @@ knitr::opts_chunk$set(warning = FALSE, message = FALSE)
 To install the current stable, CRAN version of the package, type:
 
 To benefit from the latest features and bug fixes, install the development, *github* version of the package using:
-```{r install2, eval=FALSE}
+```{r install, eval=FALSE}
 devtools::install_github("pnouvellet/Rtglm",build = TRUE)
 devtools::install_github("pnouvellet/MCMCEpiEstim",build = TRUE)
 ```
 
 Note that this requires the package *devtools* installed.
-We then instal few additional useful package for this vignette.
+We then install few additional useful package for this vignette.
 
 ```{r, library}
 rm(list=ls())
@@ -62,9 +62,10 @@ First, we load data (from EpiEstim), e.g. the daily incidence of the 1918 influe
 # load data
 data <- data(Flu1918)
 
-# make a column for local and impated cases in incidence
+# make a column for local and imported cases in incidence
 Flu1918$incidence <- data.frame(local = Flu1918$incidence,
                                 imported = 0)
+# assume first case is imported and others are local cases.
 Flu1918$incidence$imported[1] <- Flu1918$incidence$local[1]
 Flu1918$incidence$local[1] <- 0
     
@@ -89,7 +90,7 @@ First, we set the prior distribution for Rt
 
 ```{r,setupRt}
 
-# prior: exponential distribution with mean 1
+# prior distribution for Rt, gamma distribution.
 mean_prior = 5
 std_prior = 5
 para_prior <- epitrix::gamma_mucv2shapescale(mu = mean_prior,cv = std_prior/mean_prior)
@@ -99,19 +100,19 @@ hist(rgamma(n = 1e3,shape = para_prior$shape, scale = para_prior$scale),
 
 ```
 
-Here we run EpiEstim using a wrapper to obtain standardized output. the wrapper is part of Rt.glm.
+Here we run EpiEstim using an Rtglm wrapper to obtain standardized output. the wrapper is part of Rtglm.
 We run EpiEstim with a 7 day time-window, with and without overlapping time-windows.
 
 ```{r,Rt_EpiEstim_flu}
 
 # time windows
-t_window <- c(7,7)
-overlap <- c(TRUE,FALSE)
+t_window <- c(7,7) # 7 days time-windows
+overlap <- c(TRUE,FALSE) # overlapping or non-overlapping time-windows
 
 # output
 Rt_EpiEstim <- list()
 
-for(i in 1:length(t_window)){
+for(i in 1:length(t_window)){ # estimate Rt for all time-windows above
   
   res <- Rtglm::EpiEstim_wrap(I_incid = Flu1918$incidence, 
                               si_distr = Flu1918$si_distr, 
@@ -134,6 +135,7 @@ for(i in 1:length(t_window)){
 # output
 Rt_glm <- list()
 
+# same analyses but using the GLM formulation
 for(i in 1:length(t_window)){
   res <- Rtglm::glm_Rt_wrap(I_incid = Flu1918$incidence, 
                             si_distr = Flu1918$si_distr, 
@@ -150,6 +152,8 @@ for(i in 1:length(t_window)){
 
 
 ## Compare estimates
+
+Plot the resulting Rt estimates.
 
 ```{r,flu_fig,fig.height = 6, fig.width = 8}
 
@@ -173,7 +177,10 @@ for(i in 1:length(t_window)){
 
 ```
 
-# Temporal smoothing
+# Estimating Rt with a temporal smoothing
+
+
+First, we characterising the serial interval.
 
 ```{r, temporal_setup}
 
@@ -183,7 +190,7 @@ I0 <- incidence::as.incidence(x = 30, dates = 1, interval = 1)
 ```
 
 
-## Simulate Rt
+Then, we simulate an Rt trend over time, here we choose a sinusoidal pattern with a period of 30days and amplitude of 0.2 centered on 1.
 
 ```{r,Rt_temporal}
 x <- 1:101
@@ -206,6 +213,9 @@ In simulating incidence, we make use of code available in *MCMCEpiEstim* R-packa
 
 ```{r, incidence_temporal}
 set.seed(1)
+# make simulated incidence for a given initial conditions (I0), an Rt pattern (Rt), 
+# for a single location (n_loc = 1), using a Poisson offspring distribution (model), 
+# and assuming all cases are reported (below: p = 1).
 res <- MCMCEpiEstim::project_fct(I0 = I0,
                                  Rt = Rt,
                                  n_loc = 1,
@@ -215,11 +225,12 @@ res <- MCMCEpiEstim::project_fct(I0 = I0,
                                  model = 'poisson')
 
 sim_incidence <- res$I_true
+# visualise the simulated incidence
 plot(sim_incidence[,2],
      main = 'simulated incidence', bty = 'n', pch = 16,
      ylab = 'incidence', xlab = 'time')
 
-# format incidence
+# format incidence with local and imported cases as before.
 data <- data.frame(local = c(0,sim_incidence[2:nrow(sim_incidence),2]),
                    imported = c(sim_incidence[1,2],rep(0,nrow(sim_incidence)-1) ))
 ```
@@ -227,7 +238,7 @@ data <- data.frame(local = c(0,sim_incidence[2:nrow(sim_incidence),2]),
 
 
 
-## EpiEstim Estimate
+## Estimate Rt using EpiEstim
 
 ```{r, Rt_EpiEstim_temporal}
 mean_prior = 5
@@ -246,7 +257,7 @@ Rt_EpiEstim <- Rtglm::EpiEstim_wrap(I_incid = data,
 ```
 
 
-## Rt.glm estimate
+## Estimate Rt using Rtglm
 
 ```{r,Rt_glm_temporal}
 # output
@@ -257,7 +268,7 @@ Rt_gam <- Rtglm::gam_Rt_wrap(I_incid = data,
 
 ## Compare estimates
 
-plot of incidence/Rts vs. time 
+Visualise the estimated Rt trends estimated with EpiEstim, and with Rtglm using a temporal smooth. 
 
 ```{r, temporal_figures, fig.height = 6, fig.width = 8}
 layout(matrix(c(1,1,1,1,2,2,2,2),nrow = 4, ncol = 2, byrow = TRUE))
@@ -275,7 +286,7 @@ plot(Rt$t, Rt$Rt,type = 'l', lwd=2,
      main = '')
 
 # plot EpiEstim estimates
-f <- which( !is.na(Rt_EpiEstim$Rt$Mean) )
+f <- which( !is.na(Rt_EpiEstim$Rt$Mean) ) # remove time-points where Rt cannot be estimated
 lines(Rt_EpiEstim$Rt$t[f], Rt_EpiEstim$Rt$Mean[f],col='red3')
 polygon(c(Rt_EpiEstim$Rt$t[f],rev(Rt_EpiEstim$Rt$t[f])),
         c(Rt_EpiEstim$Rt$low_Quantile[f],
@@ -283,7 +294,7 @@ polygon(c(Rt_EpiEstim$Rt$t[f],rev(Rt_EpiEstim$Rt$t[f])),
         col = rgb(1,0,0,.1), border = NA)
 
 # plot Rt.glm estimates
-f <- which( !is.na(Rt_gam$Rt$Mean) )
+f <- which( !is.na(Rt_gam$Rt$Mean) ) # remove time-points where Rt cannot be estimated
 lines(Rt_gam$Rt$t[f], Rt_gam$Rt$Mean[f],col='green4')
 polygon(c(Rt_gam$Rt$t[f],rev(Rt_gam$Rt$t[f])),
         c(Rt_gam$Rt$low_Quantile[f],
@@ -299,7 +310,7 @@ legend('bottomleft',legend = c('simulated','EpiEsitm','Rt.gam'),
 
 # Spatial smoothing
 
-We first load a ma of the Unitary Authorities of the United Kingdom.
+We first load a map of the Unitary Authorities of the United Kingdom.
 
 ```{r, map_uk}
 
@@ -316,18 +327,22 @@ class(uk)
 ```
 
 
-## Simulate Rt
+## Simulate Rt trends over space
 
-We use the kernel to simulate Rt
+We use the same method as in:
+Rtglm: Unifying estimation of the time-varying reproduction number, Rt , under the Generalised Linear and Additive Models.
+
+In Summary, We construct a kernel formed of 3 distinct 2-dimension Normal distributions, with means chosen randomly among centroid of the UA of the UK and with variance randomly chosen between 0.5 and 2.
 
 ```{r, Rt_spatial}
 library(mvtnorm)
 set.seed(1)
 
+# range of simulated Rt
 Rt_min_max <- data.frame(max = 2,
                         min = 0.5)
 
-# spatial component of of force of infection
+# range of the variance of the bi-variate Normals
 var_range <- c(.5,2)
 
 # locations of 3 peak in Rt and associated variances
@@ -342,12 +357,13 @@ R_true <- data.frame(GID_2 = uk$GID_2,
                      cent.x = uk$cent.x, cent.y = uk$cent.y,
                      Rt = NA)
 
-R_true$Rt <- kernel_rt(map = uk,
+# simulate Rt
+R_true$Rt <- Rtglm::kernel_rt(map = uk,
                        mu = Mus, sigma = Sigmas,
                        Rt_min_max = Rt_min_max)
 ```
 
-Optional plot of the true Rt
+Optional plot to visualise the true Rt
 
 ```{r, Rt_spatial_plot, eval = FALSE}
 
@@ -364,20 +380,23 @@ ggplot(temp, aes(fill = Rt)) +
 
 ## Simulate incidence
 
-some useful function to backcalculate incidence expected given Rt and a total incidence.
+We first define some useful function to back-calculate incidence expected given Rt and a total incidence.
 
 ```{r, useful}
+# function that recovers growth rate (r) from Reproduction number (R) and serial interval
+# taken from Walling and Lipsitch 2006
 r_2_R <- function(r){
   R <- 1/sum(exp(-r*0:(length(si)-1))*si)
   return(R)
 }
 
 # r_2_R(r = -0.5)
-
+# function to numerically find the root of equation above, e.g. find r given R and the serial interval
 findRoot <- function(r,R){
   R_check <- r_2_R(r)
   return( (R_check - R)^2 )
 }
+# test
 # r <- optim(par = 0, fn = findRoot, method = 'BFGS', hessian=TRUE, R = 2 )$par
 ```
 
@@ -386,28 +405,38 @@ simulate incidence
 ```{r, incidence_spatial}
 ini_I <- I_sim <- list()
 I0 <- 30
-t_sim <- 5
+t_sim <- 5 # simulate 5 days of incidence to be used in the inference
 
-# initialise incidence according to Rts
+# initialise incidence according to Rt, prior to the period of inference.
 for (i in 1:nrow(uk)){   # do it for each locations
-  R <- R_true$Rt[i]
-  # simulate 10 previous days using growth rate (wallinga/lipsitch)
+  R <- R_true$Rt[i] # location specific Rt
+  # find growth rate associated with Rt above
   ini_r <- optim(par = 0, fn = findRoot,
                  method = 'BFGS',
                  hessian=TRUE, R = R )$par
+  # we simulate 10 days incidence prior to inference period
   init_t <- 10
+  # find the exponential growth/decline associated with Rt starting from 1 case
   temp <- exp(ini_r*1:init_t)
-  ini_I[[i]] <- incidence::as.incidence(x = round(temp/sum(temp)*I0),
-                                        dates = 1:init_t, interval = 1)
+  # compute the associated overall infectivity
+  temp2 <- EpiEstim::overall_infectivity(incid = temp,
+                                         si_distr =  si)
+  # adjust incidence such that if R=1, given the simulated incidence,
+  # we would expect 30 cases on the first simulation day
+  # on day 1 of simulation: E{I_11} = R* Sum{I{1:10}*si{10:1}}
+  temp3 <- temp/temp2[init_t]*I0 
+  # return integer incidence object
+  ini_I[[i]] <-  incidence::as.incidence(x = round(temp3),
+                                         dates = 1:init_t, interval = 1)
 }
 
-
+# now simulate some stochastic incidence given the above
 for (i in 1:nrow(uk)){
   R <- R_true$Rt[i]
   # simulate incidence
   I <- as.data.frame(projections::project(x = ini_I[[i]],
                                           R = R,
-                                          n_sim = 1, # keep at 1!
+                                          n_sim = 1, # number of simulation
                                           si = si[-1],
                                           n_days = t_sim,
                                           instantaneous_R = TRUE))
@@ -428,10 +457,12 @@ for (i in 1:nrow(uk)){
 }
 ```
 
-## EpiEstim Estimates
+## Estimates using EpiEstim 
 
 
 ### By UA
+
+We independently estimate one Rt for each UA.
 
 ```{r, Rt_EpiEstim_spatial_UA}
 res <-  data.frame(matrix(NA, nrow = nrow(uk), ncol = 5))
@@ -455,6 +486,8 @@ R_UA <- res
 
 ### By mid-grid
 
+We compute the aggregated incidence within a grid comprising multiple UA. Then, as above, we independently estimate one Rt for each grid.
+
 ```{r, Rt_EpiEstim_spatial_grid}
 res <-  data.frame(matrix(NA, nrow = nrow(uk), ncol = 5))
 names(res) <-  c('Mean','Std',
@@ -463,22 +496,23 @@ names(res) <-  c('Mean','Std',
 unique_grid <- unique(uk$grid2)
 
 for (i in 1:length(unique_grid)){
-  
+  # find which UA belong to the grid
   f <- which(uk$grid2 %in% unique_grid[i])
-  
+  # initialise incidence with the first UA belonging to the grid
   I_corr <- I_sim[[ f[1] ]]
+  # add incidence from other UAs belong to the grid
   if(length(f)>1){
     for(l in 2:length(f)){
       I_corr <- I_corr+I_sim[[ f[l] ]]
     }
   }
   
-  
+  # estimate Rt for the grid
   resEE <- Rtglm::EpiEstim_sp_wrap(I_incid = I_corr,
                                    si_distr = si,
                                    t_ini = init_t)
   
-  
+  # save output
   res[f,] <- matrix(data = c(resEE$R$Mean, resEE$R$Std,
                              resEE$R$low_Quantile, resEE$R$Median,
                              resEE$R$high_Quantile), nrow = length(f), ncol = 5,
@@ -493,8 +527,10 @@ R_grid <- res
 
 ## Rt.glm estimate
 
+Estimate Rt across space, using a smooth spatial function for Rt.
+
 ```{r, Rt_glm_spatial}
-res_gam <- gam_Rt_sp_wrap(I_incid = I_sim,
+res_gam <- Rtglm::gam_Rt_sp_wrap(I_incid = I_sim,
                           si_distr = si,
                           x=uk$cent.x,
                           y=uk$cent.y)
@@ -506,8 +542,11 @@ R_gam <- res
 
 ## Compare estimates
 
+Visualise the results
 
 ## maps of Rts
+
+First, we prepare the dataframe for ggplot.
 
 ```{r, spatial_figures_prep, eval = TRUE}
 uk <- st_sf(cbind(uk,
@@ -521,6 +560,7 @@ names(temp)[2] <- 'R'
 uk <- merge(uk,temp)
 ```
 
+We plot the mean Rt estimates, using either EpiEstim at UA scale, at grid scale, and using Rtglm with a spatial smooth.
 
 ```{r,spatial_figures_mean}
 ggplot(uk, aes(fill = R)) +
@@ -552,6 +592,8 @@ ggplot(uk, aes(fill = gam_Mean)) +
 
 
 ## plot uncertainties maps (CV)
+
+We plot the mean Coefficient of Variation estimates, using either EpiEstim at UA scale, at grid scale, and using Rtglm with a spatial smooth.
 
 ```{r, spatial_figures_CV, eval = TRUE}
 uk$UA_cvL <- log10(uk$UA_Std/uk$UA_Mean)
