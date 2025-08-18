@@ -313,16 +313,18 @@ legend('bottomleft',legend = c('simulated','EpiEsitm','Rt.gam'),
 We first load a map of the Unitary Authorities of the United Kingdom.
 
 ```{r, map_uk}
-
-# Define the raw URL
-rds_url <- "https://raw.githubusercontent.com/pnouvellet/Rtglm/master/vignettes/ukMap.rds"
-# Temporary file path
-temp_file <- tempfile(fileext = ".rds")
-# Download the file
-download.file(rds_url, temp_file, mode = "wb")
-# Read the RDS file
-uk <- readRDS(temp_file)
-
+if (file.exists('ukMap.rds')){
+  uk <- readRDS('ukMap.rds')
+}else{
+  # Define the raw URL
+  rds_url <- "https://raw.githubusercontent.com/pnouvellet/Rtglm/master/vignettes/ukMap.rds"
+  # Temporary file path
+  temp_file <- tempfile(fileext = ".rds")
+  # Download the file
+  download.file(rds_url, temp_file, mode = "wb")
+  # Read the RDS file
+  uk <- readRDS(temp_file)
+}
 class(uk)
 ```
 
