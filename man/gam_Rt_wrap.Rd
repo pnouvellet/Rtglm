@@ -4,7 +4,7 @@
 \alias{gam_Rt_wrap}
 \title{Wrapper to run the gam version of EpiEstim with temporal smooth}
 \usage{
-gam_Rt_wrap(I_incid, si_distr, dist = "poisson")
+gam_Rt_wrap(I_incid, si_distr, dist = "poisson", k_basis = 10)
 }
 \arguments{
 \item{I_incid}{A dataframe of non-negative integers with two columns, so that
