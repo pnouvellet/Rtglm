@@ -35,7 +35,7 @@
 glm_Rt_wrap_corrTC <- function(I_incid, rho, gamma, si_distr, t_window, overlap = FALSE){
   
   # reframe data and make overal infectivity
-  data_infer <- prep_glm_TC(I_incid, si_distr, rho, gamma)
+  data_infer <- prep_glm_corrTC(I_incid, si_distr, rho, gamma)
   
   # prepare data to include time window information
   data_infer <- prep_glm_tWindow(data_infer, t_window, overlap)
