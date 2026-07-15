@@ -36,7 +36,7 @@ prep_glm_corrTC <- function(I_incid, si_distr, rho, gamma){
     data_infer$Oi[t] <- sum( si_distr[seq_len(t)] * data_infer$incidence[seq(t, 1)] *
                                1/gamma[seq(t, 1)] * 1/rho[seq(t, 1)] , na.rm = TRUE)
   }
-  data_infer$Oi <- rho * data_infer$Oi * temp$gamma
+  data_infer$Oi <- rho * data_infer$Oi * gamma
   
   # correct incidence when Oi is 0 to NA
   f <- which(data_infer$Oi ==0)
