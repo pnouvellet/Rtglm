@@ -31,7 +31,7 @@
 #'
 #'
 #' @export
-glm_Rt_wrap_corrTC <- function(I_incid, rho, gamma, location, si_distr, t_window, overlap = FALSE){
+glm_Rt_wrap_corrTC_location <- function(I_incid, rho, gamma, location, si_distr, t_window, overlap = FALSE){
   
   if (location==1){
     # reframe data and make overal infectivity
