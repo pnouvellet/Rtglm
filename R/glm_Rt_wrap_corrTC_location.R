@@ -45,8 +45,8 @@ glm_Rt_wrap_corrTC_location <- function(I_incid, rho, gamma, location, si_distr,
     }
   }
   
-  # prepare data to include time window information
-  data_infer <- prep_glm_tWindow(data_infer, t_window, overlap)
+  # # prepare data to include time window information
+  # data_infer <- prep_glm_tWindow(data_infer, t_window, overlap)
   
   # run glm version of EPiEstim (assuming Poisson distribution as default)
   # coefficient in the below is equivalent to logI = log(Rt)+log(OI) -> Rt = exp(coeff)
