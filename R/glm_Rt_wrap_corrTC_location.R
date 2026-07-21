@@ -50,7 +50,7 @@ glm_Rt_wrap_corrTC_location <- function(I_incid, rho, gamma, location, si_distr,
   
   # run glm version of EPiEstim (assuming Poisson distribution as default)
   # coefficient in the below is equivalent to logI = log(Rt)+log(OI) -> Rt = exp(coeff)
-  m_glm <- mgcv::gam(incidence ~ 0 + tw*location + offset(log_Oi), 
+  m_glm <- glm(incidence ~ 0 + tw*location + offset(log_Oi), 
                      data = data_infer, family = poisson(link = "log"))
   
   # run the prediction
