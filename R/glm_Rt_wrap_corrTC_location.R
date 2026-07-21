@@ -36,17 +36,20 @@ glm_Rt_wrap_corrTC_location <- function(I_incid, rho, gamma, location, si_distr,
   if (length(location)==1){
     # reframe data and make overal infectivity
     data_infer <- prep_glm_corrTC(I_incid, si_distr, rho, gamma)
+    # # prepare data to include time window information
+    data_infer <- prep_glm_tWindow(data_infer, t_window, overlap)
   }else{
     data_infer <- c()
     for (i in 1:length(location)){
       temp <- prep_glm_corrTC(I_incid[[i]], si_distr, rho[,i], gamma[,i])
       temp$location <- paste0('location_',i)
+      # # prepare data to include time window information
+      temp <- prep_glm_tWindow(temp, t_window, overlap)
+      
       data_infer <- rbind(data_infer, temp)
     }
   }
   
-  # # prepare data to include time window information
-  # data_infer <- prep_glm_tWindow(data_infer, t_window, overlap)
   
   # run glm version of EPiEstim (assuming Poisson distribution as default)
   # coefficient in the below is equivalent to logI = log(Rt)+log(OI) -> Rt = exp(coeff)
