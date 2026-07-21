@@ -43,6 +43,11 @@ prep_glm_corrTC <- function(I_incid, si_distr, rho, gamma){
   if(length(f)>0){
     data_infer$Oi[f] <- NA
   }
+  # correct incidence when Oi is 0 to NA
+  f <- which(is.nan(data_infer$Oi))
+  if(length(f)>0){
+    data_infer$Oi[f] <- NA
+  }
   
   # save the log-transformed infectivity
   data_infer$log_Oi <- log(data_infer$Oi)
