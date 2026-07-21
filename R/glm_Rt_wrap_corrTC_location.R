@@ -38,7 +38,7 @@ glm_Rt_wrap_corrTC_location <- function(I_incid, rho, gamma, location, si_distr,
     data_infer <- prep_glm_corrTC(I_incid, si_distr, rho, gamma)
   }else{
     data_infer <- c()
-    for (i in 1:location){
+    for (i in 1:length(location)){
       temp <- prep_glm_corrTC(I_incid[[i]], si_distr, rho[,i], gamma[,i])
       temp$location <- paste0('location_',i)
       data_infer <- rbind(data_infer, temp)
