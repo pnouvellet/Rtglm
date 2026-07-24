@@ -42,7 +42,7 @@ glm_Rt_wrap_corrTC_location <- function(I_incid, rho, gamma, location, si_distr,
     data_infer <- c()
     for (i in 1:length(location)){
       temp <- prep_glm_corrTC(I_incid[[i]], si_distr, rho[,i], gamma[,i])
-      temp$location <- paste0('location_',i)
+      temp$location <- location[i]
       # # prepare data to include time window information
       temp <- prep_glm_tWindow(temp, t_window, overlap)
       
@@ -57,15 +57,16 @@ glm_Rt_wrap_corrTC_location <- function(I_incid, rho, gamma, location, si_distr,
                      data = data_infer, family = poisson(link = "log"))
   
   # run the prediction
-  data_infer <- pred_Rtglm(model = m_glm, 
+  data_infer <- pred_Rtglm_location(model = m_glm, 
                            newdata = data_infer,
                            t_window = t_window,
-                           overlap = overlap)
+                           overlap = overlap,
+                           location = location)
   
   # save the results of the run
   res <- list(config = list(t_window, overlap), 
               model = m_glm,
-              Rt = data_infer[,c( "t","Mean","low_Quantile","high_Quantile",'Std')])
+              Rt = data_infer[,c( "t","location","Mean","low_Quantile","high_Quantile",'Std')])
   
   return(res)
   
