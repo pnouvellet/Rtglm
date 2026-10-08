@@ -1,5 +1,5 @@
 #' Wrapper to run Epiestim
-#'
+#' add some
 #' This function is for internal use only and is not documented.
 #' It was used to run EpiEstim with fixed parameterisation in the proof-of-concept paper, and
 #' obtain standardised outputs.
